@@ -1,0 +1,34 @@
+[metro-file-map] Cache write error
+: Error: ENOSPC: no space left on device, write
+    at async write (node:internal/fs/promises:746:8)
+    at async writeFileHandle (node:internal/fs/promises:503:7)
+    at async C:\Users\Pc\Desktop\easy syndic\mobile\node_modules\@expo\metro-file-map\build\cache\DiskCacheManager.js:78:17 {
+  errno: -4055,
+  code: 'ENOSPC',
+  syscall: 'write'
+}
+
+
+#
+# Fatal process out of memory: Zone
+#
+----- Native stack trace -----
+
+ 1: 00007FF6515D70F7 
+ 2: 00007FF6514AB6EF 
+ 3: 00007FF6527A5076 
+ 4: 00007FF65212BAE1 
+ 5: 00007FF651C0E4EB 
+ 6: 00007FF65293627A 
+ 7: 00007FF65293637E 
+ 8: 00007FF6528C87E2 
+ 9: 00007FF6528C4775 
+10: 00007FF6528BF4AA 
+11: 00007FF6520A8E14 
+12: 00007FF65206F9F2 
+13: 00007FF652330926 
+14: 00007FF6514AE490 
+15: 00007FF651636063 
+16: 00007FF652EB9FFB 
+17: 00007FFA6D89E8D7 BaseThreadInitThunk+23
+18: 00007FFA6E6EC3FC RtlUserThreadStart+44

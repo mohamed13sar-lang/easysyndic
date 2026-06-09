@@ -1,0 +1,14 @@
+
+> mobile@1.0.0 start
+> expo start --host lan
+
+env: load .env
+env: export EXPO_PUBLIC_API_URL
+Starting project at C:\Users\Pc\Desktop\easy syndic\mobile
+Using src/app as the root directory for Expo Router.
+Starting Metro Bundler
+
+Waiting on http://localhost:8081
+An update for expo is available: 56.0.7 → ~56.0.9
+5 other packages may need updating. Run npx expo install --check for details.
+Logs for your project will appear below.

@@ -1,0 +1,566 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  SYNDIC
+  RESIDENT
+  PROVIDER
+  CASHIER
+}
+
+enum ResidentType {
+  OWNER
+  TENANT
+}
+
+enum PaymentStatus {
+  PAYE
+  NON_PAYE
+  PARTIELLEMENT_PAYE
+  EN_RETARD
+  EXONERE
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  CHECK
+  CASH_PLUS
+  WAFACASH
+  MOBILE_PAYMENT
+  OTHER
+}
+
+enum PaymentTransactionSource {
+  RESIDENT_DECLARATION
+  SYNDIC_ENTRY
+}
+
+enum PaymentTransactionStatus {
+  PENDING
+  VALIDATED
+  REJECTED
+}
+
+enum InvoiceStatus {
+  PAYEE
+  NON_PAYEE
+  EN_ATTENTE
+  ANNULEE
+}
+
+enum FinancialTransactionType {
+  INCOME
+  EXPENSE
+  ADJUSTMENT
+}
+
+enum MonthlyStatementStatus {
+  DRAFT
+  GENERATED
+  VALIDATED
+  ARCHIVED
+}
+
+enum ComplaintCategory {
+  ASCENSEUR
+  EAU
+  ELECTRICITE
+  NETTOYAGE
+  SECURITE
+  PARKING
+  BRUIT
+  ECLAIRAGE
+  PORTE_GARAGE
+  CAMERA
+  VOISINAGE
+  AUTRE
+}
+
+enum ComplaintUrgency {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum ComplaintStatus {
+  NOUVELLE
+  VUE
+  EN_COURS
+  ENVOYEE_LHRAYFI
+  PRESTATAIRE_AFFECTE
+  RESOLUE
+  FERMEE
+  REFUSEE
+}
+
+enum ComplaintMediaType {
+  IMAGE
+  VIDEO
+  AUDIO
+  DOCUMENT
+}
+
+enum NotificationType {
+  GENERAL
+  TARGETED
+  NEW_ANNOUNCEMENT
+  PAYMENT_REMINDER
+  PAYMENT_RECEIVED
+  COMPLAINT_STATUS
+  DOCUMENT_SHARED
+  SYSTEM
+}
+
+enum NotificationTargetType {
+  RESIDENCE
+  APARTMENT
+  USER
+  NON_PAID
+  ROLE
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+  READ
+}
+
+enum AnnouncementType {
+  ASSEMBLEE_GENERALE
+  DECES
+  COUPURE_ELECTRICITE
+  COUPURE_EAU
+  TRAVAUX
+  NETTOYAGE
+  SECURITE
+  AUTRE
+}
+
+enum AnnouncementPriority {
+  NORMAL
+  IMPORTANT
+  URGENT
+}
+
+model User {
+  id                           String                  @id @default(uuid())
+  fullName                     String
+  phone                        String                  @unique
+  email                        String?                 @unique
+  password                     String?
+  role                         UserRole
+  isActive                     Boolean                 @default(true)
+  createdAt                    DateTime                @default(now())
+  updatedAt                    DateTime                @updatedAt
+  residences                   Residence[]             @relation("SyndicResidences")
+  residentApartments           ResidentApartment[]
+  residentPayments             Payment[]               @relation("ResidentPayments")
+  paymentsCreated              Payment[]               @relation("PaymentsCreatedBy")
+  paymentTransactionsCreated   PaymentTransaction[]    @relation("PaymentTransactionsCreatedBy")
+  paymentTransactionsValidated PaymentTransaction[]    @relation("PaymentTransactionsValidatedBy")
+  invoicesCreated              ExpenseInvoice[]        @relation("InvoicesCreatedBy")
+  statementsGenerated          MonthlyStatement[]      @relation("StatementsGeneratedBy")
+  financialTransactionsCreated FinancialTransaction[]  @relation("FinancialTransactionsCreatedBy")
+  residentComplaints           Complaint[]             @relation("ResidentComplaints")
+  assignedComplaints           Complaint[]             @relation("AssignedComplaints")
+  complaintMediaUploaded        ComplaintMedia[]        @relation("ComplaintMediaUploadedBy")
+  complaintComments            ComplaintComment[]      @relation("ComplaintComments")
+  notificationsSent            Notification[]          @relation("NotificationsSent")
+  notificationsReceived        NotificationRecipient[] @relation("NotificationsReceived")
+  announcementsCreated         Announcement[]          @relation("AnnouncementsCreatedBy")
+  pushTokens                   UserPushToken[]         @relation("UserPushTokens")
+}
+
+model Residence {
+  id                    String                 @id @default(uuid())
+  name                  String
+  address               String
+  city                  String
+  district              String?
+  syndicId              String
+  totalApartments       Int?
+  isActive              Boolean                @default(true)
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  syndic                User                   @relation("SyndicResidences", fields: [syndicId], references: [id])
+  apartments            Apartment[]
+  residentApartments    ResidentApartment[]
+  payments              Payment[]
+  expenseInvoices       ExpenseInvoice[]
+  monthlyStatements     MonthlyStatement[]
+  financialTransactions FinancialTransaction[]
+  complaints            Complaint[]
+  notifications         Notification[]
+  announcements         Announcement[]
+
+  @@index([syndicId])
+  @@index([city])
+  @@index([isActive])
+}
+
+model Announcement {
+  id          String               @id @default(uuid())
+  residenceId String
+  createdById String
+  title       String
+  message     String
+  type        AnnouncementType
+  priority    AnnouncementPriority @default(NORMAL)
+  publishAt   DateTime             @default(now())
+  expiresAt   DateTime?
+  isActive    Boolean              @default(true)
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+
+  residence Residence @relation(fields: [residenceId], references: [id])
+  createdBy User      @relation("AnnouncementsCreatedBy", fields: [createdById], references: [id])
+
+  @@index([residenceId])
+  @@index([createdById])
+  @@index([type])
+  @@index([priority])
+  @@index([publishAt])
+  @@index([expiresAt])
+  @@index([isActive])
+}
+
+model Notification {
+  id          String                 @id @default(uuid())
+  residenceId String?
+  senderId    String
+  title       String
+  message     String
+  type        NotificationType
+  targetType  NotificationTargetType
+  targetId    String?
+  metadata    Json?
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+
+  residence  Residence?              @relation(fields: [residenceId], references: [id])
+  sender     User                    @relation("NotificationsSent", fields: [senderId], references: [id])
+  recipients NotificationRecipient[]
+
+  @@index([residenceId])
+  @@index([senderId])
+  @@index([type])
+  @@index([targetType])
+  @@index([createdAt])
+}
+
+model NotificationRecipient {
+  id             String             @id @default(uuid())
+  notificationId String
+  userId         String
+  isRead         Boolean            @default(false)
+  readAt         DateTime?
+  pushStatus     NotificationStatus @default(PENDING)
+  pushError      String?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  notification Notification @relation(fields: [notificationId], references: [id])
+  user         User         @relation("NotificationsReceived", fields: [userId], references: [id])
+
+  @@unique([notificationId, userId])
+  @@index([notificationId])
+  @@index([userId])
+  @@index([isRead])
+  @@index([pushStatus])
+}
+
+model UserPushToken {
+  id            String   @id @default(uuid())
+  userId        String
+  expoPushToken String   @unique
+  platform      String
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user User @relation("UserPushTokens", fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([platform])
+  @@index([isActive])
+}
+
+model Apartment {
+  id          String   @id @default(uuid())
+  residenceId String
+  number      String
+  floor       Int?
+  block       String?
+  surface     Float?
+  monthlyFee  Float?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  residence          Residence           @relation(fields: [residenceId], references: [id])
+  residentApartments ResidentApartment[]
+  payments           Payment[]
+  complaints         Complaint[]
+
+  @@unique([residenceId, number])
+  @@index([residenceId])
+  @@index([block])
+  @@index([floor])
+  @@index([isActive])
+}
+
+model Complaint {
+  id            String            @id @default(uuid())
+  residenceId   String
+  apartmentId   String
+  residentId    String
+  category      ComplaintCategory
+  title         String
+  description   String
+  urgency       ComplaintUrgency  @default(MEDIUM)
+  status        ComplaintStatus   @default(NOUVELLE)
+  assignedToId  String?
+  sentToLhrayfi Boolean           @default(false)
+  isAnonymous   Boolean           @default(false)
+  isActive      Boolean           @default(true)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  closedAt      DateTime?
+
+  residence  Residence @relation(fields: [residenceId], references: [id])
+  apartment  Apartment @relation(fields: [apartmentId], references: [id])
+  resident   User      @relation("ResidentComplaints", fields: [residentId], references: [id])
+  assignedTo User?     @relation("AssignedComplaints", fields: [assignedToId], references: [id])
+
+  media    ComplaintMedia[]
+  comments ComplaintComment[]
+
+  @@index([residenceId])
+  @@index([apartmentId])
+  @@index([residentId])
+  @@index([assignedToId])
+  @@index([category])
+  @@index([urgency])
+  @@index([status])
+  @@index([isActive])
+  @@index([createdAt])
+}
+
+model ComplaintMedia {
+  id           String             @id @default(uuid())
+  complaintId  String
+  fileUrl      String
+  fileType     ComplaintMediaType
+  fileName     String?
+  mimeType     String?
+  size         Int?
+  uploadedById String?
+  createdAt    DateTime           @default(now())
+
+  complaint  Complaint @relation(fields: [complaintId], references: [id])
+  uploadedBy User?     @relation("ComplaintMediaUploadedBy", fields: [uploadedById], references: [id])
+
+  @@index([complaintId])
+  @@index([fileType])
+  @@index([uploadedById])
+}
+
+model ComplaintComment {
+  id          String   @id @default(uuid())
+  complaintId String
+  userId      String
+  comment     String
+  isInternal  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  complaint Complaint @relation(fields: [complaintId], references: [id])
+  user      User      @relation("ComplaintComments", fields: [userId], references: [id])
+
+  @@index([complaintId])
+  @@index([userId])
+  @@index([isInternal])
+}
+
+model Payment {
+  id              String         @id @default(uuid())
+  residenceId     String
+  apartmentId     String
+  residentId      String
+  amountDue       Float
+  amountPaid      Float
+  remainingAmount Float
+  month           Int
+  year            Int
+  status          PaymentStatus
+  dueDate         DateTime?
+  paymentMethod   PaymentMethod?
+  receiptUrl      String?
+  note            String?
+  createdById     String
+  paidAt          DateTime?
+  isActive        Boolean        @default(true)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  residence    Residence            @relation(fields: [residenceId], references: [id])
+  apartment    Apartment            @relation(fields: [apartmentId], references: [id])
+  resident     User                 @relation("ResidentPayments", fields: [residentId], references: [id])
+  createdBy    User                 @relation("PaymentsCreatedBy", fields: [createdById], references: [id])
+  transactions PaymentTransaction[]
+
+  @@unique([apartmentId, month, year])
+  @@index([residenceId])
+  @@index([apartmentId])
+  @@index([residentId])
+  @@index([createdById])
+  @@index([status])
+  @@index([dueDate])
+  @@index([month, year])
+  @@index([isActive])
+}
+
+model PaymentTransaction {
+  id            String                   @id @default(uuid())
+  paymentId     String
+  amount        Float
+  paymentMethod PaymentMethod?
+  source        PaymentTransactionSource @default(SYNDIC_ENTRY)
+  status        PaymentTransactionStatus @default(VALIDATED)
+  receiptUrl    String?
+  proofUrl      String?
+  note          String?
+  paidAt        DateTime
+  validatedAt   DateTime?
+  validatedById String?
+  createdById   String
+  isActive      Boolean                  @default(true)
+  createdAt     DateTime                 @default(now())
+  updatedAt     DateTime                 @updatedAt
+
+  payment     Payment @relation(fields: [paymentId], references: [id])
+  createdBy   User    @relation("PaymentTransactionsCreatedBy", fields: [createdById], references: [id])
+  validatedBy User?   @relation("PaymentTransactionsValidatedBy", fields: [validatedById], references: [id])
+
+  @@index([paymentId])
+  @@index([createdById])
+  @@index([validatedById])
+  @@index([source])
+  @@index([status])
+  @@index([paidAt])
+  @@index([isActive])
+}
+
+model ExpenseInvoice {
+  id           String        @id @default(uuid())
+  residenceId  String
+  title        String
+  supplierName String?
+  category     String
+  amount       Float
+  invoiceDate  DateTime
+  paymentDate  DateTime?
+  status       InvoiceStatus
+  fileUrl      String?
+  note         String?
+  createdById  String
+  isActive     Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  residence Residence @relation(fields: [residenceId], references: [id])
+  createdBy User      @relation("InvoicesCreatedBy", fields: [createdById], references: [id])
+
+  @@index([residenceId])
+  @@index([createdById])
+  @@index([status])
+  @@index([category])
+  @@index([invoiceDate])
+  @@index([isActive])
+}
+
+model MonthlyStatement {
+  id             String                 @id @default(uuid())
+  residenceId    String
+  month          Int
+  year           Int
+  openingBalance Float
+  totalIncome    Float
+  totalExpenses  Float
+  closingBalance Float
+  generatedById  String
+  pdfUrl         String?
+  status         MonthlyStatementStatus @default(DRAFT)
+  createdAt      DateTime               @default(now())
+  updatedAt      DateTime               @updatedAt
+
+  residence   Residence @relation(fields: [residenceId], references: [id])
+  generatedBy User      @relation("StatementsGeneratedBy", fields: [generatedById], references: [id])
+
+  @@unique([residenceId, month, year])
+  @@index([residenceId])
+  @@index([generatedById])
+  @@index([status])
+  @@index([month, year])
+}
+
+model FinancialTransaction {
+  id              String                   @id @default(uuid())
+  residenceId     String
+  type            FinancialTransactionType
+  category        String
+  amount          Float
+  description     String?
+  sourceType      String?
+  sourceId        String?
+  createdById     String
+  transactionDate DateTime
+  createdAt       DateTime                 @default(now())
+
+  residence Residence @relation(fields: [residenceId], references: [id])
+  createdBy User      @relation("FinancialTransactionsCreatedBy", fields: [createdById], references: [id])
+
+  @@index([residenceId])
+  @@index([createdById])
+  @@index([type])
+  @@index([category])
+  @@index([transactionDate])
+}
+
+model ResidentApartment {
+  id           String       @id @default(uuid())
+  userId       String
+  apartmentId  String
+  residenceId  String
+  residentType ResidentType
+  isPrimary    Boolean      @default(true)
+  startDate    DateTime?
+  endDate      DateTime?
+  isActive     Boolean      @default(true)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  user      User      @relation(fields: [userId], references: [id])
+  apartment Apartment @relation(fields: [apartmentId], references: [id])
+  residence Residence @relation(fields: [residenceId], references: [id])
+
+  @@unique([userId, apartmentId])
+  @@index([userId])
+  @@index([apartmentId])
+  @@index([residenceId])
+  @@index([residentType])
+  @@index([isActive])
+}

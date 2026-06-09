@@ -1,0 +1,139 @@
+
+> easysyndic-backend@0.0.1 start
+> nest start
+
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[NestFactory] [39m[32mStarting Nest application...[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAppModule dependencies initialized[39m[38;5;3m +32ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mPrismaModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mPassportModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigHostModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mThrottlerModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mHealthModule dependencies initialized[39m[38;5;3m +2ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mConfigModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mJwtModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mJwtModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mUsersModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mResidencesModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mApartmentsModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mResidentsModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mMeModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mPaymentsModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mInvoicesModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mStatementsModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mCashierModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mComplaintsModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mNotificationsModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mDashboardModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mOtpModule dependencies initialized[39m[38;5;3m +1ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[InstanceLoader] [39m[32mAuthModule dependencies initialized[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mHealthController {/health}:[39m[38;5;3m +100ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/health, GET} route[39m[38;5;3m +2ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mUsersController {/users}:[39m[38;5;3m +1ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/users, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/users, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/users/:id, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/users/:id, PUT} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/users/:id/status, PATCH} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/users/:id, DELETE} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mAuthController {/auth}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/auth/login, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/auth/me, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mOtpController {/auth}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/auth/send-otp, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/auth/verify-otp, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mResidencesController {/}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/syndic/residences, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/residences, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/residences, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/residences/:id, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/residences/:id, PUT} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/residences/:id, DELETE} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/residences/:id/status, PATCH} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mApartmentsController {/}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/syndic/residences/:residenceId/apartments, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/syndic/residences/:residenceId/apartments, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/residences/:residenceId/apartments, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/residences/:residenceId/apartments, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/apartments/:id, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/apartments/:id, PUT} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/apartments/:id, DELETE} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/apartments/:id/status, PATCH} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mResidentsController {/}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/syndic/residences/:residenceId/residents, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/syndic/residences/:residenceId/residents, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/syndic/residences/:residenceId/residents/:residentId/assign-apartment, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/residences/:residenceId/residents, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/residences/:residenceId/residents, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/residents/:id, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/residents/:id, PUT} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/residents/:id, DELETE} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/residents/:residentId/assign-apartment, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/apartments/:apartmentId/residents, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/resident-apartments/:id/status, PATCH} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mMeController {/me}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/me/residences, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mPaymentsController {/}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/syndic/residences/:residenceId/payments, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/syndic/residences/:residenceId/payments/non-paid, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/syndic/residences/:residenceId/payments, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/syndic/residences/:residenceId/payments/:paymentId, PATCH} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/me/payments, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/residences/:residenceId/payments, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/residences/:residenceId/payments, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/residences/:residenceId/payments/non-paid, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/payments/:id, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/payments/:id, PUT} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/payments/:id/status, PATCH} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/payments/:id, DELETE} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mInvoicesController {/}:[39m[38;5;3m +1ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/residences/:residenceId/invoices, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/residences/:residenceId/invoices, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/invoices/:id, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/invoices/:id, PUT} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/invoices/:id/status, PATCH} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/invoices/:id, DELETE} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mStatementsController {/}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/residences/:residenceId/statements/generate, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/residences/:residenceId/statements, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/statements/:id, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mCashierController {/}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/residences/:residenceId/cashier/dashboard, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mComplaintsController {/}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/syndic/residences/:residenceId/complaints, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/syndic/residences/:residenceId/complaints/:complaintId, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/syndic/residences/:residenceId/complaints/:complaintId/status, PATCH} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/syndic/residences/:residenceId/complaints/:complaintId/comments, POST} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/me/complaints, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/me/complaints, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/me/complaints/:id, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/residences/:residenceId/complaints, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/residences/:residenceId/my-complaints, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/residences/:residenceId/complaints, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/complaints/:id, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/complaints/:id, PUT} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/complaints/:id/status, PATCH} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/complaints/:id, DELETE} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/complaints/:id/media, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/complaints/:id/comments, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/complaints/:id/comments, GET} route[39m[38;5;3m +1ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mNotificationsController {/}:[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/residences/:residenceId/notifications, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/residences/:residenceId/notifications, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/residences/:residenceId/notifications/non-paid, POST} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/notifications/:id, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/me/notifications, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/me/notifications/:recipientId/read, PATCH} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/me/notifications/read-all, PATCH} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RoutesResolver] [39m[32mDashboardController {/}:[39m[38;5;3m +1ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/dashboard/stats, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[RouterExplorer] [39m[32mMapped {/syndic/dashboard/stats, GET} route[39m[38;5;3m +0ms[39m
+[32m[Nest] 17896  - [39m07/06/2026 22:45:11 [32m    LOG[39m [38;5;3m[NestApplication] [39m[32mNest application successfully started[39m[38;5;3m +120ms[39m
+EasySyndic Backend running on http://localhost:3000
+Swagger docs available at http://localhost:3000/api
+login started
+user found: yes
+password exists: yes
+password compare result: true
+token generated
+(node:17896) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
