@@ -13,6 +13,9 @@
     "preview": {
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://easysyndic.up.railway.app"
       }
     },
     "production": {

@@ -19,7 +19,7 @@ type AuthContextValue = {
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 async function clearAllAuthStorage() {
-  await Promise.all([
+  await Promise.allSettled([
     clearSession(),
     clearSelectedResidenceRelationId(),
     clearSelectedSyndicResidenceId(),

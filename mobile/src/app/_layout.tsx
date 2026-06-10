@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider } from '@/auth/AuthContext';
+import { getApiConfigError } from '@/config/runtime';
 import { colors } from '@/constants/colors';
 import { useAuth } from '@/hooks/use-auth';
 
@@ -121,6 +122,21 @@ function RouteGuard() {
 
 function AppStack() {
   const { connectionError, isLoading } = useAuth();
+  const apiConfigError = getApiConfigError();
+
+  if (apiConfigError) {
+    return (
+      <SafeAreaProvider>
+        <StatusBar style="dark" />
+        <View style={styles.configErrorScreen}>
+          <Text style={styles.configErrorTitle}>Configuration requise</Text>
+          <Text style={styles.configErrorText}>
+            {apiConfigError} Configurez EXPO_PUBLIC_API_URL dans EAS puis reconstruisez l'APK.
+          </Text>
+        </View>
+      </SafeAreaProvider>
+    );
+  }
 
   return (
     <SafeAreaProvider>
@@ -148,7 +164,7 @@ function AppStack() {
         <Stack.Screen name="notifications/[id]" />
         <Stack.Screen name="announcements" />
         <Stack.Screen name="announcements/[id]" />
-        <Stack.Screen name="complaints" />
+        <Stack.Screen name="complaints/index" />
         <Stack.Screen name="complaints/new" />
         <Stack.Screen name="complaints/[id]" />
         <Stack.Screen name="syndic/dashboard" />
@@ -206,6 +222,26 @@ const styles = StyleSheet.create({
     color: '#92400E',
     fontSize: 13,
     fontWeight: '700',
+    textAlign: 'center',
+  },
+  configErrorScreen: {
+    flex: 1,
+    backgroundColor: colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  configErrorTitle: {
+    color: colors.text,
+    fontSize: 20,
+    fontWeight: '800',
+    textAlign: 'center',
+  },
+  configErrorText: {
+    marginTop: 10,
+    color: colors.muted,
+    fontSize: 14,
+    lineHeight: 22,
     textAlign: 'center',
   },
 });

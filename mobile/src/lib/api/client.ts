@@ -1,6 +1,7 @@
 import { Platform } from 'react-native';
+import { getApiBaseUrl } from '@/config/runtime';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL;
+const API_URL = getApiBaseUrl();
 const IS_DEV = process.env.NODE_ENV !== 'production';
 const AUTH_PATHS = new Set([
   '/auth/send-otp',

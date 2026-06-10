@@ -205,6 +205,8 @@ export default function ComplaintNewScreen() {
       setError(
         err instanceof ApiError
           ? err.message
+          : err instanceof Error
+            ? err.message
           : 'Impossible d’envoyer la réclamation.',
       );
     } finally {

@@ -1,9 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
-
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
-const storageBucket =
-  process.env.EXPO_PUBLIC_SUPABASE_STORAGE_BUCKET ?? 'easysyndic-media';
+import { getSupabaseConfig } from '@/config/runtime';
 
 type LocalUploadFile = {
   uri: string;
@@ -19,14 +14,17 @@ export type UploadedFile = {
   size?: number | null;
 };
 
-function getSupabaseClient() {
-  if (!supabaseUrl || !supabaseAnonKey) {
+async function getSupabaseClient() {
+  const { anonKey, url } = getSupabaseConfig();
+
+  if (!url || !anonKey) {
     throw new Error(
-      'Supabase Storage non configure. Ajoutez EXPO_PUBLIC_SUPABASE_URL, EXPO_PUBLIC_SUPABASE_ANON_KEY et EXPO_PUBLIC_SUPABASE_STORAGE_BUCKET.',
+      'Upload indisponible: Supabase Storage non configure.',
     );
   }
 
-  return createClient(supabaseUrl, supabaseAnonKey);
+  const { createClient } = await import('@supabase/supabase-js');
+  return createClient(url, anonKey);
 }
 
 function extensionFromMime(mimeType: string) {
@@ -50,14 +48,15 @@ async function uploadFile(
   file: LocalUploadFile,
   fallbackMimeType: string,
 ): Promise<UploadedFile> {
-  const client = getSupabaseClient();
+  const client = await getSupabaseClient();
+  const { bucket } = getSupabaseConfig();
   const mimeType = file.mimeType ?? fallbackMimeType;
   const fileName = buildFileName(file, fallbackMimeType);
   const path = `${folder}/${Date.now()}-${fileName}`;
   const response = await fetch(file.uri);
   const blob = await response.blob();
 
-  const { error } = await client.storage.from(storageBucket).upload(path, blob, {
+  const { error } = await client.storage.from(bucket).upload(path, blob, {
     contentType: mimeType,
     upsert: false,
   });
@@ -66,7 +65,7 @@ async function uploadFile(
     throw new Error(error.message);
   }
 
-  const { data } = client.storage.from(storageBucket).getPublicUrl(path);
+  const { data } = client.storage.from(bucket).getPublicUrl(path);
 
   return {
     url: data.publicUrl,
