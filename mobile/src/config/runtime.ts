@@ -28,10 +28,10 @@ export function getApiConfigError() {
     const parsed = new URL(apiUrl);
 
     if (!['http:', 'https:'].includes(parsed.protocol)) {
-      return "L'adresse API mobile est invalide.";
+      return 'Configuration serveur invalide';
     }
   } catch {
-    return "L'adresse API mobile est invalide.";
+    return 'Configuration serveur invalide';
   }
 
   return null;

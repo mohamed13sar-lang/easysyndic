@@ -1,5 +1,4 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { Audio } from 'expo-av';
 import { ChevronLeft, ClipboardList, Image as ImageIcon, Volume2 } from 'lucide-react-native';
 import { useCallback, useEffect, useState } from 'react';
 import {
@@ -65,7 +64,7 @@ export default function ComplaintDetailsScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [playingAudioUrl, setPlayingAudioUrl] = useState<string | null>(null);
-  const [audioSound, setAudioSound] = useState<Audio.Sound | null>(null);
+  const [audioSound, setAudioSound] = useState<any>(null);
 
   const openMedia = async (url: string) => {
     try {
@@ -83,17 +82,13 @@ export default function ComplaintDetailsScreen() {
   const playAudio = async (url: string) => {
     try {
       if (audioSound) {
-        await audioSound.unloadAsync();
+        audioSound.remove();
       }
-      const { sound } = await Audio.Sound.createAsync({ uri: url });
-      setAudioSound(sound);
+      const Audio = await import('expo-audio');
+      const player = Audio.createAudioPlayer({ uri: url });
+      setAudioSound(player);
       setPlayingAudioUrl(url);
-      sound.setOnPlaybackStatusUpdate((status) => {
-        if (status.isLoaded && status.didJustFinish) {
-          setPlayingAudioUrl(null);
-        }
-      });
-      await sound.playAsync();
+      player.play();
     } catch {
       Alert.alert('Message vocal', 'Impossible de lire ce message vocal.');
     }

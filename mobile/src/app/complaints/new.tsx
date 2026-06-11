@@ -1,6 +1,5 @@
 import { router } from 'expo-router';
-import { Audio } from 'expo-av';
-import * as ImagePicker from 'expo-image-picker';
+import type { ImagePickerAsset } from 'expo-image-picker';
 import {
   Camera,
   ChevronLeft,
@@ -51,35 +50,41 @@ export default function ComplaintNewScreen() {
   const [category, setCategory] = useState<ComplaintCategory>('EAU');
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [selectedImages, setSelectedImages] = useState<ImagePicker.ImagePickerAsset[]>([]);
+  const [selectedImages, setSelectedImages] = useState<ImagePickerAsset[]>([]);
   const [audioUri, setAudioUri] = useState<string | null>(null);
   const [audioDuration, setAudioDuration] = useState(0);
-  const [recording, setRecording] = useState<Audio.Recording | null>(null);
-  const [previewSound, setPreviewSound] = useState<Audio.Sound | null>(null);
+  const [recording, setRecording] = useState<any>(null);
+  const [previewSound, setPreviewSound] = useState<any>(null);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const pickImages = async (source: 'camera' | 'library') => {
-    const permission =
-      source === 'camera'
-        ? await ImagePicker.requestCameraPermissionsAsync()
-        : await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert('Permission requise', 'Autorisez l acces aux photos pour joindre une image.');
-      return;
-    }
+    try {
+      const ImagePicker = await import('expo-image-picker');
+      const permission =
+        source === 'camera'
+          ? await ImagePicker.requestCameraPermissionsAsync()
+          : await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (!permission.granted) {
+        Alert.alert('Permission requise', 'Autorisez l acces aux photos pour joindre une image.');
+        return;
+      }
 
-    const result =
-      source === 'camera'
-        ? await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: 0.85 })
-        : await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ['images'],
-            allowsMultipleSelection: true,
-            quality: 0.85,
-          });
+      const result =
+        source === 'camera'
+          ? await ImagePicker.launchCameraAsync({ mediaTypes: ['images'], quality: 0.85 })
+          : await ImagePicker.launchImageLibraryAsync({
+              mediaTypes: ['images'],
+              allowsMultipleSelection: true,
+              quality: 0.85,
+            });
 
-    if (!result.canceled) {
-      setSelectedImages((current) => [...current, ...result.assets]);
+      if (!result.canceled) {
+        setSelectedImages((current) => [...current, ...result.assets]);
+      }
+    } catch (error) {
+      console.warn('[complaints] image picker unavailable', error);
+      Alert.alert('Photo indisponible', "Impossible d'ouvrir la camera ou la galerie.");
     }
   };
 
@@ -92,40 +97,59 @@ export default function ComplaintNewScreen() {
   };
 
   const startRecording = async () => {
-    const permission = await Audio.requestPermissionsAsync();
-    if (!permission.granted) {
-      Alert.alert('Permission requise', 'Autorisez le microphone pour enregistrer un message vocal.');
-      return;
-    }
+    try {
+      const Audio = await import('expo-audio');
+      const permission = await Audio.requestRecordingPermissionsAsync();
+      if (!permission.granted) {
+        Alert.alert('Permission requise', 'Autorisez le microphone pour enregistrer un message vocal.');
+        return;
+      }
 
-    await Audio.setAudioModeAsync({
-      allowsRecordingIOS: true,
-      playsInSilentModeIOS: true,
-    });
-    const { recording: nextRecording } = await Audio.Recording.createAsync(
-      Audio.RecordingOptionsPresets.HIGH_QUALITY,
-    );
-    setRecording(nextRecording);
+      await Audio.setAudioModeAsync({
+        allowsRecording: true,
+        playsInSilentMode: true,
+      });
+      const nextRecording = new Audio.AudioModule.AudioRecorder(Audio.RecordingPresets.HIGH_QUALITY);
+      await nextRecording.prepareToRecordAsync();
+      nextRecording.record();
+      setRecording(nextRecording);
+    } catch (error) {
+      console.warn('[complaints] audio recorder unavailable', error);
+      Alert.alert('Audio indisponible', "Impossible d'utiliser le microphone.");
+    }
   };
 
   const stopRecording = async () => {
     if (!recording) return;
-    await recording.stopAndUnloadAsync();
-    const status = await recording.getStatusAsync();
-    setAudioUri(recording.getURI());
-    setAudioDuration(status.isDoneRecording ? status.durationMillis ?? 0 : 0);
-    setRecording(null);
+    try {
+      await recording.stop();
+      const status = recording.getStatus();
+      setAudioUri(recording.uri ?? status.url);
+      setAudioDuration(status.durationMillis ?? 0);
+    } catch (error) {
+      console.warn('[complaints] stop recording failed', error);
+      Alert.alert('Audio indisponible', "Impossible d'enregistrer ce message vocal.");
+    } finally {
+      setRecording(null);
+    }
   };
 
   const playAudioPreview = async () => {
     if (!audioUri) return;
-    if (previewSound) {
-      await previewSound.replayAsync();
-      return;
+    try {
+      if (previewSound) {
+        await previewSound.seekTo(0);
+        previewSound.play();
+        return;
+      }
+      const Audio = await import('expo-audio');
+      const player = Audio.createAudioPlayer({ uri: audioUri });
+      setPreviewSound(player);
+      player.play();
+    } catch (error) {
+      console.warn('[complaints] audio preview unavailable', error);
+      Alert.alert('Audio indisponible', 'Impossible de lire ce message vocal.');
     }
-    const { sound } = await Audio.Sound.createAsync({ uri: audioUri });
-    setPreviewSound(sound);
-    await sound.playAsync();
   };
 
   const formatDuration = (millis: number) => {

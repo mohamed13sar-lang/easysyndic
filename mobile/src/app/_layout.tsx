@@ -1,7 +1,7 @@
 import { Stack, usePathname, useRouter } from 'expo-router';
 import type { ErrorBoundaryProps } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { Component, ReactNode, useEffect } from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider } from '@/auth/AuthContext';
@@ -67,6 +67,37 @@ function getRoleHome(role?: string) {
   }
 
   return '/login';
+}
+
+class GlobalRenderBoundary extends Component<
+  { children: ReactNode },
+  { hasError: boolean }
+> {
+  state = { hasError: false };
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: unknown) {
+    console.error('[root] render error', error);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <SafeAreaProvider>
+          <StatusBar style="dark" />
+          <View style={styles.configErrorScreen}>
+            <Text style={styles.configErrorTitle}>Une erreur est survenue</Text>
+            <Text style={styles.configErrorText}>Veuillez redémarrer l'application</Text>
+          </View>
+        </SafeAreaProvider>
+      );
+    }
+
+    return this.props.children;
+  }
 }
 
 function isResidentRoute(pathname: string) {
@@ -188,9 +219,11 @@ function AppStack() {
 
 export default function RootLayout() {
   return (
-    <AuthProvider>
-      <AppStack />
-    </AuthProvider>
+    <GlobalRenderBoundary>
+      <AuthProvider>
+        <AppStack />
+      </AuthProvider>
+    </GlobalRenderBoundary>
   );
 }
 

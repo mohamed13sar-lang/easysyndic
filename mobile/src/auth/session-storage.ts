@@ -1,17 +1,14 @@
-import * as SecureStore from 'expo-secure-store';
 import { Platform } from 'react-native';
 import type { AuthSession, AuthUser } from '@/services/auth-service';
+import {
+  deleteSecureStoreItem,
+  getSecureStoreItem,
+  isSecureStoreAvailable,
+  setSecureStoreItem,
+} from '@/services/safe-secure-store';
 
 export const TOKEN_KEY = 'easysyndic.auth.token';
 export const USER_KEY = 'easysyndic.auth.user';
-
-async function isSecureStoreAvailable() {
-  try {
-    return await SecureStore.isAvailableAsync();
-  } catch {
-    return false;
-  }
-}
 
 async function setSecureItem(key: string, value: string) {
   if (!(await isSecureStoreAvailable())) {
@@ -19,11 +16,7 @@ async function setSecureItem(key: string, value: string) {
     return;
   }
 
-  try {
-    await SecureStore.setItemAsync(key, value);
-  } catch (error) {
-    console.warn(`[auth-storage] failed to save ${key}`, error);
-  }
+  await setSecureStoreItem(key, value);
 }
 
 async function getSecureItem(key: string) {
@@ -31,12 +24,7 @@ async function getSecureItem(key: string) {
     return getFallbackItem(key);
   }
 
-  try {
-    return await SecureStore.getItemAsync(key);
-  } catch (error) {
-    console.warn(`[auth-storage] failed to load ${key}`, error);
-    return null;
-  }
+  return getSecureStoreItem(key);
 }
 
 async function deleteSecureItem(key: string) {
@@ -45,11 +33,7 @@ async function deleteSecureItem(key: string) {
     return;
   }
 
-  try {
-    await SecureStore.deleteItemAsync(key);
-  } catch (error) {
-    console.warn(`[auth-storage] failed to delete ${key}`, error);
-  }
+  await deleteSecureStoreItem(key);
 }
 
 function getFallbackStorage() {

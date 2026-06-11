@@ -1,6 +1,6 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { CalendarDays, Camera, ChevronLeft, Image as ImageIcon, Receipt } from 'lucide-react-native';
-import * as ImagePicker from 'expo-image-picker';
+import type { ImagePickerAsset } from 'expo-image-picker';
 import { useCallback, useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -100,7 +100,7 @@ export default function PaymentDetailsScreen() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeclareVisible, setIsDeclareVisible] = useState(false);
   const [declaredAmount, setDeclaredAmount] = useState('');
-  const [declaredProof, setDeclaredProof] = useState<ImagePicker.ImagePickerAsset | null>(null);
+  const [declaredProof, setDeclaredProof] = useState<ImagePickerAsset | null>(null);
   const [declaredNote, setDeclaredNote] = useState('');
   const [declaredMethod, setDeclaredMethod] = useState<PaymentMethod>('BANK_TRANSFER');
   const [error, setError] = useState('');
@@ -130,34 +130,40 @@ export default function PaymentDetailsScreen() {
   }, [loadPayment]);
 
   const pickProofImage = async (source: 'camera' | 'library') => {
-    const permission =
-      source === 'camera'
-        ? await ImagePicker.requestCameraPermissionsAsync()
-        : await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    if (!permission.granted) {
-      Alert.alert(
-        'Permission requise',
+    try {
+      const ImagePicker = await import('expo-image-picker');
+      const permission =
         source === 'camera'
-          ? 'Autorisez la camera pour prendre une photo.'
-          : 'Autorisez la galerie pour choisir une image.',
-      );
-      return;
-    }
+          ? await ImagePicker.requestCameraPermissionsAsync()
+          : await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-    const result =
-      source === 'camera'
-        ? await ImagePicker.launchCameraAsync({
-            mediaTypes: ['images'],
-            quality: 0.85,
-          })
-        : await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ['images'],
-            quality: 0.85,
-          });
+      if (!permission.granted) {
+        Alert.alert(
+          'Permission requise',
+          source === 'camera'
+            ? 'Autorisez la camera pour prendre une photo.'
+            : 'Autorisez la galerie pour choisir une image.',
+        );
+        return;
+      }
 
-    if (!result.canceled) {
-      setDeclaredProof(result.assets[0]);
+      const result =
+        source === 'camera'
+          ? await ImagePicker.launchCameraAsync({
+              mediaTypes: ['images'],
+              quality: 0.85,
+            })
+          : await ImagePicker.launchImageLibraryAsync({
+              mediaTypes: ['images'],
+              quality: 0.85,
+            });
+
+      if (!result.canceled) {
+        setDeclaredProof(result.assets[0]);
+      }
+    } catch (error) {
+      console.warn('[payments] image picker unavailable', error);
+      Alert.alert('Photo indisponible', "Impossible d'ouvrir la camera ou la galerie.");
     }
   };
 

@@ -1,5 +1,5 @@
 import { Platform } from 'react-native';
-import { getApiBaseUrl } from '@/config/runtime';
+import { getApiBaseUrl, getApiConfigError } from '@/config/runtime';
 
 const API_URL = getApiBaseUrl();
 const IS_DEV = process.env.NODE_ENV !== 'production';
@@ -30,7 +30,9 @@ type RequestOptions = {
 
 function getApiUrl() {
   if (!API_URL) {
-    throw new ApiError('Serveur inaccessible. Vérifiez l’adresse API.', 0);
+    const configError = getApiConfigError() ?? 'Serveur inaccessible';
+    console.error('[api] invalid configuration', configError);
+    throw new ApiError(configError, 0, { configError });
   }
 
   const configuredUrl = API_URL.trim().replace(/^["']|["']$/g, '').replace(/\/$/, '');

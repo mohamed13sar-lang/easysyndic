@@ -1,14 +1,11 @@
-import * as SecureStore from 'expo-secure-store';
+import {
+  deleteSecureStoreItem,
+  getSecureStoreItem,
+  isSecureStoreAvailable,
+  setSecureStoreItem,
+} from '@/services/safe-secure-store';
 
 const SELECTED_RELATION_KEY = 'easysyndic.selectedResidentRelation';
-
-async function isSecureStoreAvailable() {
-  try {
-    return await SecureStore.isAvailableAsync();
-  } catch {
-    return false;
-  }
-}
 
 export async function saveSelectedResidenceRelationId(relationId: string) {
   if (!(await isSecureStoreAvailable())) {
@@ -16,7 +13,7 @@ export async function saveSelectedResidenceRelationId(relationId: string) {
   }
 
   try {
-    await SecureStore.setItemAsync(SELECTED_RELATION_KEY, relationId);
+    await setSecureStoreItem(SELECTED_RELATION_KEY, relationId);
   } catch (error) {
     console.warn('[selected-residence-storage] failed to save selected resident residence', error);
   }
@@ -28,7 +25,7 @@ export async function loadSelectedResidenceRelationId() {
   }
 
   try {
-    return await SecureStore.getItemAsync(SELECTED_RELATION_KEY);
+    return await getSecureStoreItem(SELECTED_RELATION_KEY);
   } catch (error) {
     console.warn('[selected-residence-storage] failed to load selected resident residence', error);
     return null;
@@ -41,7 +38,7 @@ export async function clearSelectedResidenceRelationId() {
   }
 
   try {
-    await SecureStore.deleteItemAsync(SELECTED_RELATION_KEY);
+    await deleteSecureStoreItem(SELECTED_RELATION_KEY);
   } catch (error) {
     console.warn('[selected-residence-storage] failed to clear selected resident residence', error);
   }
