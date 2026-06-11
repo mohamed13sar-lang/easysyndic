@@ -98,6 +98,14 @@ function resolveErrorMessage(payload: unknown, fallback: string) {
   return fallback;
 }
 
+function resolveHttpErrorMessage(status: number, payload: unknown) {
+  if (status === 404) {
+    return "Service introuvable. Vérifiez l'URL API.";
+  }
+
+  return resolveErrorMessage(payload, 'Une erreur est survenue.');
+}
+
 export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const url = `${getApiUrl()}${path}`;
   const isAuth = isAuthRequest(path);
@@ -116,10 +124,13 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
   let response: Response;
 
   try {
+    if (isAuth) {
+      console.log('[auth-api] final URL', url);
+    }
+
     if (IS_DEV) {
       console.log('[api] request', options.method ?? 'GET', url);
       if (isAuth) {
-        console.log('[auth-api] final URL', url);
         console.log('[auth-api] request body', redactAuthBody(options.body));
       }
     }
@@ -140,17 +151,18 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
         });
       }
     }
-    throw new ApiError('Serveur inaccessible. Vérifiez l’adresse API.', 0, {
+    throw new ApiError('Serveur inaccessible.', 0, {
       url,
       cause: error instanceof Error ? error.message : String(error),
     });
   }
 
+  if (isAuth) {
+    console.log('[auth-api] response status', response.status, url);
+  }
+
   if (IS_DEV) {
     console.log('[api] response status', response.status, url);
-    if (isAuth) {
-      console.log('[auth-api] response status', response.status, url);
-    }
   }
 
   const text = await response.text();
@@ -166,7 +178,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     if (IS_DEV) {
       console.log('[api] backend error', response.status, url, payload);
     }
-    throw new ApiError(resolveErrorMessage(payload, 'Une erreur est survenue.'), response.status, payload);
+    throw new ApiError(resolveHttpErrorMessage(response.status, payload), response.status, payload);
   }
 
   return payload as T;

@@ -37,11 +37,13 @@ async function bootstrap() {
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
-      transformOptions: { enableImplicitConversion: true },
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
     }),
   );
 
-  const config = new DocumentBuilder()
+  const swaggerConfig = new DocumentBuilder()
     .setTitle('EasySyndic Backend')
     .setDescription('API documentation for EasySyndic mobile backend')
     .setVersion('1.0.0')
@@ -57,14 +59,28 @@ async function bootstrap() {
       'JWT-auth',
     )
     .build();
-  const document = SwaggerModule.createDocument(app, config);
+
+  const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api', app, document);
 
   const configService = app.get(ConfigService);
-  const port = configService.get<number>('app.port') ?? 3000;
+  const port =
+    Number(process.env.PORT) ||
+    configService.get<number>('app.port') ||
+    3000;
+  const nodeEnv = process.env.NODE_ENV ?? 'development';
 
-  await app.listen(port);
-  console.log(`EasySyndic Backend running on http://localhost:${port}`);
-  console.log(`Swagger docs available at http://localhost:${port}/api`);
+  await app.listen(port, '0.0.0.0');
+
+  console.log(`EasySyndic Backend listening on 0.0.0.0:${port}`);
+  console.log(`PORT=${port}`);
+  console.log(`NODE_ENV=${nodeEnv}`);
+  console.log('Swagger path=/api');
+  console.log('Health path=/health');
 }
-bootstrap();
+
+bootstrap().catch((error) => {
+  console.error('Failed to start EasySyndic Backend');
+  console.error(error);
+  process.exit(1);
+});
