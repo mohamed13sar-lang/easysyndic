@@ -7,6 +7,13 @@ import {
 import { ComplaintMediaType, ComplaintStatus, UserRole } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import {
+  ALLOWED_AUDIO_MIME_TYPES,
+  ALLOWED_IMAGE_MIME_TYPES,
+  STORAGE_BUCKETS,
+  STORAGE_LIMITS,
+} from '../storage/storage.constants';
+import { StorageService } from '../storage/storage.service';
 import { AddComplaintCommentDto } from './dto/add-complaint-comment.dto';
 import { AddComplaintMediaDto } from './dto/add-complaint-media.dto';
 import { CreateComplaintDto } from './dto/create-complaint.dto';
@@ -25,6 +32,7 @@ export class ComplaintsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notificationsService: NotificationsService,
+    private readonly storage: StorageService,
   ) {}
 
   async findMyComplaints(
@@ -54,8 +62,8 @@ export class ComplaintsService {
       orderBy: { createdAt: 'desc' },
     });
 
-    return complaints.map((c) =>
-      this.toComplaintResponse(c, currentUser, false),
+    return Promise.all(
+      complaints.map((c) => this.toComplaintResponse(c, currentUser, false)),
     );
   }
 
@@ -81,6 +89,56 @@ export class ComplaintsService {
       },
       currentUser,
     );
+  }
+
+  async createMyComplaintWithFiles(
+    dto: CreateMyComplaintDto,
+    files: Array<{
+      originalname?: string;
+      mimetype?: string;
+      size?: number;
+      buffer?: Buffer;
+    }>,
+    currentUser: AuthUser,
+  ) {
+    const complaint = await this.createMyComplaint(dto, currentUser);
+    if (!files.length) return complaint;
+
+    for (const file of files) {
+      const isAudio = file.mimetype?.startsWith('audio/');
+      this.storage.validateFile(file, {
+        allowedMimeTypes: isAudio
+          ? ALLOWED_AUDIO_MIME_TYPES
+          : ALLOWED_IMAGE_MIME_TYPES,
+        maxSize: isAudio ? STORAGE_LIMITS.audio : STORAGE_LIMITS.image,
+        label: isAudio ? 'Audio' : 'Image',
+      });
+      const storagePath = this.storage.buildPath(
+        ['complaints', complaint.id],
+        file.originalname,
+      );
+      await this.storage.uploadPrivateFile(
+        STORAGE_BUCKETS.complaintMedia,
+        storagePath,
+        file,
+      );
+      await this.prisma.complaintMedia.create({
+        data: {
+          complaintId: complaint.id,
+          fileUrl: storagePath,
+          storagePath,
+          fileType: isAudio
+            ? ComplaintMediaType.AUDIO
+            : ComplaintMediaType.IMAGE,
+          fileName: file.originalname,
+          mimeType: file.mimetype,
+          size: file.size ?? file.buffer.length,
+          uploadedById: currentUser.id,
+        },
+      });
+    }
+
+    return this.findMyComplaint(complaint.id, currentUser);
   }
 
   async findMyComplaint(id: string, currentUser: AuthUser) {
@@ -175,8 +233,8 @@ export class ComplaintsService {
       orderBy: { createdAt: 'desc' },
     });
 
-    return complaints.map((c) =>
-      this.toComplaintResponse(c, currentUser, false),
+    return Promise.all(
+      complaints.map((c) => this.toComplaintResponse(c, currentUser, false)),
     );
   }
 
@@ -195,8 +253,8 @@ export class ComplaintsService {
       include: this.complaintInclude(),
       orderBy: { createdAt: 'desc' },
     });
-    return complaints.map((c) =>
-      this.toComplaintResponse(c, currentUser, false),
+    return Promise.all(
+      complaints.map((c) => this.toComplaintResponse(c, currentUser, false)),
     );
   }
 
@@ -412,7 +470,7 @@ export class ComplaintsService {
       where: { complaintId: id },
       orderBy: { createdAt: 'asc' },
     });
-    return media.map((item) => this.toMediaResponse(item));
+    return Promise.all(media.map((item) => this.toMediaResponse(item)));
   }
 
   async addComment(
@@ -583,7 +641,7 @@ export class ComplaintsService {
     return complaint;
   }
 
-  private toComplaintResponse(
+  private async toComplaintResponse(
     complaint: Awaited<ReturnType<typeof this.getComplaintByIdOrThrow>>,
     currentUser: AuthUser,
     includeResidentObject: boolean,
@@ -610,7 +668,9 @@ export class ComplaintsService {
       createdAt: complaint.createdAt,
       updatedAt: complaint.updatedAt,
       closedAt: complaint.closedAt,
-      media: complaint.media.map((item) => this.toMediaResponse(item)),
+      media: await Promise.all(
+        complaint.media.map((item) => this.toMediaResponse(item)),
+      ),
       commentsCount: complaint._count.comments,
     };
   }
@@ -634,7 +694,7 @@ export class ComplaintsService {
     return type;
   }
 
-  private toMediaResponse(media: {
+  private async toMediaResponse(media: {
     id: string;
     complaintId: string;
     fileUrl: string;
@@ -644,10 +704,19 @@ export class ComplaintsService {
     size: number | null;
     uploadedById?: string | null;
     createdAt: Date;
+    storagePath?: string | null;
   }) {
+    const signedUrl =
+      media.storagePath && this.storage.isConfigured()
+        ? await this.storage.createSignedUrl(
+            STORAGE_BUCKETS.complaintMedia,
+            media.storagePath,
+          )
+        : undefined;
     return {
       ...media,
-      url: media.fileUrl,
+      url: signedUrl ?? media.fileUrl,
+      signedUrl,
       type: media.fileType,
       uploadedById: media.uploadedById ?? null,
     };

@@ -15,6 +15,12 @@ import {
 } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import {
+  ALLOWED_IMAGE_MIME_TYPES,
+  STORAGE_BUCKETS,
+  STORAGE_LIMITS,
+} from '../storage/storage.constants';
+import { StorageService } from '../storage/storage.service';
 import { TeamPermissionsService } from '../team/team-permissions.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { CreatePaymentTransactionDto } from './dto/create-payment-transaction.dto';
@@ -100,6 +106,7 @@ export class PaymentsService {
     private readonly prisma: PrismaService,
     private readonly notificationsService: NotificationsService,
     private readonly permissionsService: TeamPermissionsService,
+    private readonly storage: StorageService,
   ) {}
 
   async findMyPayments(
@@ -428,6 +435,67 @@ export class PaymentsService {
     }
   }
 
+  async findPendingDeclarations(residenceId: string, currentUser: AuthUser) {
+    const residence = await this.getResidenceOrThrow(residenceId);
+    this.assertResidenceAccess(currentUser, residence.syndicId);
+
+    const declarations = await this.prisma.paymentTransaction.findMany({
+      where: {
+        source: PaymentTransactionSource.RESIDENT_DECLARATION,
+        status: PaymentTransactionStatus.PENDING,
+        isActive: true,
+        payment: { residenceId },
+      },
+      include: {
+        payment: {
+          select: {
+            id: true,
+            month: true,
+            year: true,
+            residenceId: true,
+            apartment: { select: { id: true, number: true, block: true } },
+            resident: { select: { id: true, fullName: true, phone: true } },
+            paymentProofs: {
+              orderBy: { createdAt: 'desc' },
+              take: 1,
+            },
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return Promise.all(
+      declarations.map(async (declaration) => {
+        const proof = declaration.payment.paymentProofs[0] ?? null;
+        const proofSignedUrl =
+          proof?.storagePath && this.storage.isConfigured()
+            ? await this.storage.createSignedUrl(
+                STORAGE_BUCKETS.paymentProofs,
+                proof.storagePath,
+              )
+            : null;
+
+        return {
+          id: declaration.id,
+          paymentId: declaration.paymentId,
+          amount: this.toNumber(declaration.amount),
+          paymentMethod: declaration.paymentMethod,
+          status: declaration.status,
+          note: declaration.note,
+          paidAt: declaration.paidAt,
+          createdAt: declaration.createdAt,
+          proofUrl: proofSignedUrl ?? declaration.proofUrl,
+          proofSignedUrl,
+          payment: {
+            ...declaration.payment,
+            paymentProofs: undefined,
+          },
+        };
+      }),
+    );
+  }
+
   async addTransaction(
     residenceId: string,
     paymentId: string,
@@ -483,6 +551,12 @@ export class PaymentsService {
     paymentId: string,
     dto: DeclarePaymentDto,
     currentUser: AuthUser,
+    proofFile?: {
+      originalname?: string;
+      mimetype?: string;
+      size?: number;
+      buffer?: Buffer;
+    },
   ) {
     if (currentUser.role !== UserRole.RESIDENT) {
       throw new ForbiddenException('Only residents can use this endpoint');
@@ -519,6 +593,35 @@ export class PaymentsService {
       throw new ConflictException('Le montant du versement doit être positif');
     }
 
+    let proofStoragePath = dto.proofUrl;
+
+    if (proofFile) {
+      this.storage.validateFile(proofFile, {
+        allowedMimeTypes: ALLOWED_IMAGE_MIME_TYPES,
+        maxSize: STORAGE_LIMITS.image,
+        label: 'Justificatif',
+      });
+      proofStoragePath = this.storage.buildPath(
+        ['payments', paymentId, 'proofs'],
+        proofFile.originalname,
+      );
+      await this.storage.uploadPrivateFile(
+        STORAGE_BUCKETS.paymentProofs,
+        proofStoragePath,
+        proofFile,
+      );
+      await this.prisma.paymentProof.create({
+        data: {
+          paymentId,
+          fileName: proofFile.originalname ?? 'preuve-paiement',
+          mimeType: proofFile.mimetype ?? 'application/octet-stream',
+          size: proofFile.size ?? proofFile.buffer.length,
+          storagePath: proofStoragePath,
+          uploadedById: currentUser.id,
+        },
+      });
+    }
+
     try {
       await this.prisma.paymentTransaction.create({
         data: {
@@ -527,10 +630,10 @@ export class PaymentsService {
           paymentMethod: dto.paymentMethod,
           source: PaymentTransactionSource.RESIDENT_DECLARATION,
           status: PaymentTransactionStatus.PENDING,
-          proofUrl: dto.proofUrl,
-          receiptUrl: dto.proofUrl,
+          proofUrl: proofStoragePath,
+          receiptUrl: proofStoragePath,
           note: dto.note,
-          paidAt: new Date(),
+          paidAt: dto.paidAt ? new Date(dto.paidAt) : new Date(),
           createdById: currentUser.id,
           isActive: true,
         },

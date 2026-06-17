@@ -8,9 +8,13 @@ import {
   Patch,
   Post,
   Query,
+  UploadedFile,
   Put,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 import { UserRole } from '@prisma/client';
 import {
   ApiBearerAuth,
@@ -65,6 +69,18 @@ export class PaymentsController {
       residenceId,
       currentUser,
     );
+  }
+
+  @Get('syndic/payments/declarations')
+  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC, UserRole.VICE_SYNDIC, UserRole.CAISSIER, UserRole.CASHIER)
+  @RequirePermission('payments', 'view')
+  @ApiOperation({ summary: 'List pending resident payment declarations' })
+  @ApiOkResponse({ isArray: true })
+  findPendingDeclarations(
+    @Query('residenceId', new ParseUUIDPipe()) residenceId: string,
+    @CurrentUser() currentUser: AuthUser,
+  ) {
+    return this.paymentsService.findPendingDeclarations(residenceId, currentUser);
   }
 
   @Get('syndic/residences/:residenceId/payments')
@@ -281,15 +297,28 @@ export class PaymentsController {
 
   @Post('me/payments/:paymentId/declare-payment')
   @Roles(UserRole.RESIDENT)
+  @UseInterceptors(FileInterceptor('proof', { storage: memoryStorage() }))
   @ApiOperation({ summary: 'Declare a payment for validation' })
   @ApiParam({ name: 'paymentId', format: 'uuid' })
   @ApiCreatedResponse({ type: MyPaymentResponseEntity })
   declareMyPayment(
     @Param('paymentId', new ParseUUIDPipe()) paymentId: string,
     @Body() dto: DeclarePaymentDto,
+    @UploadedFile()
+    proofFile: {
+      originalname?: string;
+      mimetype?: string;
+      size?: number;
+      buffer?: Buffer;
+    },
     @CurrentUser() currentUser: AuthUser,
   ) {
-    return this.paymentsService.declarePayment(paymentId, dto, currentUser);
+    return this.paymentsService.declarePayment(
+      paymentId,
+      dto,
+      currentUser,
+      proofFile,
+    );
   }
 
   @Post('residences/:residenceId/payments')

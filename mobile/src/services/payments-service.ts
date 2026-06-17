@@ -1,4 +1,5 @@
 import { apiRequest } from '@/lib/api/client';
+import { appendUploadFile, type UploadFile } from './upload-service';
 
 export type PaymentStatus =
   | 'PAYE'
@@ -69,6 +70,7 @@ export type DeclarePaymentInput = {
   paymentMethod?: PaymentMethod;
   proofUrl?: string;
   note?: string;
+  paidAt?: string;
 };
 
 function toNumber(value: unknown) {
@@ -155,15 +157,33 @@ export async function declareMyPayment(
   token: string,
   paymentId: string,
   input: DeclarePaymentInput,
+  proof?: UploadFile | null,
 ) {
+  const body = proof ? buildDeclarePaymentFormData(input, proof) : input;
   const payment = await apiRequest<ResidentPayment>(
     `/me/payments/${paymentId}/declare-payment`,
     {
       method: 'POST',
       token,
-      body: input,
+      body,
     },
   );
 
   return normalizeResidentPayment(payment);
+}
+
+function buildDeclarePaymentFormData(input: DeclarePaymentInput, proof: UploadFile) {
+  const formData = new FormData();
+  formData.append('amount', String(input.amount));
+  if (input.paymentMethod) {
+    formData.append('paymentMethod', input.paymentMethod);
+  }
+  if (input.note) {
+    formData.append('note', input.note);
+  }
+  if (input.paidAt) {
+    formData.append('paidAt', input.paidAt);
+  }
+  appendUploadFile(formData, 'proof', proof);
+  return formData;
 }

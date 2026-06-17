@@ -25,6 +25,7 @@ import {
   PaymentStatus,
   ResidentPayment,
 } from '@/services/payments-service';
+import { imageAssetToUploadFile } from '@/services/upload-service';
 
 const monthNames = [
   'Janvier',
@@ -190,12 +191,12 @@ export default function PaymentDetailsScreen() {
         noteParts.push(declaredNote.trim());
       }
 
-      // TODO: include proofUrl when a backend-compatible upload endpoint is available.
       const updatedPayment = await declareMyPayment(token, payment.id, {
         amount,
         paymentMethod: declaredMethod,
         note: noteParts.join(' - '),
-      });
+        paidAt: declaredDate,
+      }, declaredProof ? imageAssetToUploadFile(declaredProof, 'preuve-paiement.jpg') : null);
       setPayment(updatedPayment);
       setDeclaredAmount('');
       setDeclaredProof(null);
@@ -355,7 +356,7 @@ export default function PaymentDetailsScreen() {
               <View style={styles.proofCopy}>
                 <Text style={styles.proofTitle}>Preuve de paiement</Text>
                 <Text style={styles.proofSubtitle}>
-                  {declaredProof ? 'Image selectionnee (non envoyee)' : 'Prendre une photo ou choisir depuis la galerie'}
+                  {declaredProof ? 'Image selectionnee' : 'Prendre une photo ou choisir depuis la galerie'}
                 </Text>
               </View>
             </Pressable>

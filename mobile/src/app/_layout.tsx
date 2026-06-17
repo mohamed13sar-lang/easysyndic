@@ -225,6 +225,7 @@ function AppStack() {
         <Stack.Screen name="syndic/complaints" />
         <Stack.Screen name="syndic/notifications" />
         <Stack.Screen name="syndic/announcements" />
+        <Stack.Screen name="syndic/documents" />
         <Stack.Screen name="syndic/assistant" />
         <Stack.Screen name="syndic/team" />
         <Stack.Screen name="syndic/team/new" />

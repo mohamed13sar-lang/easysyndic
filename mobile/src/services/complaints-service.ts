@@ -1,4 +1,5 @@
 import { apiRequest } from '@/lib/api/client';
+import { appendUploadFile, type UploadFile } from './upload-service';
 
 export type ComplaintCategory =
   | 'ASCENSEUR'
@@ -112,6 +113,31 @@ export function createMyComplaint(token: string, input: CreateComplaintInput) {
     method: 'POST',
     token,
     body: input,
+  });
+}
+
+export function createMyComplaintWithMedia(
+  token: string,
+  input: CreateComplaintInput,
+  files: UploadFile[],
+) {
+  if (!files.length) {
+    return createMyComplaint(token, input);
+  }
+
+  const formData = new FormData();
+  formData.append('residenceId', input.residenceId);
+  formData.append('apartmentId', input.apartmentId);
+  formData.append('category', input.category);
+  formData.append('title', input.title);
+  formData.append('description', input.description);
+  formData.append('urgency', input.urgency);
+  files.forEach((file) => appendUploadFile(formData, 'files', file));
+
+  return apiRequest<ResidentComplaint>('/me/complaints', {
+    method: 'POST',
+    token,
+    body: formData,
   });
 }
 

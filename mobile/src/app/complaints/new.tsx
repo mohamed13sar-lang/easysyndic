@@ -33,8 +33,9 @@ import { ApiError } from '@/lib/api/client';
 import {
   ComplaintCategory,
   ComplaintUrgency,
-  createMyComplaint,
+  createMyComplaintWithMedia,
 } from '@/services/complaints-service';
+import { imageAssetToUploadFile, type UploadFile } from '@/services/upload-service';
 
 const categories = [
   { key: 'Plomberie', value: 'EAU' as ComplaintCategory, icon: Droplets },
@@ -184,15 +185,25 @@ export default function ComplaintNewScreen() {
     setIsSubmitting(true);
 
     try {
-      // TODO: send selectedImages/audioUri when the backend exposes multipart upload.
-      await createMyComplaint(token, {
+      const files: UploadFile[] = selectedImages.map((asset, index) =>
+        imageAssetToUploadFile(asset, `reclamation-${index + 1}.jpg`),
+      );
+      if (audioUri) {
+        files.push({
+          uri: audioUri,
+          name: 'message-vocal.m4a',
+          type: 'audio/m4a',
+        });
+      }
+
+      await createMyComplaintWithMedia(token, {
         residenceId: selectedResidence.id,
         apartmentId: selectedResidence.apartment.id,
         category,
         title: title.trim(),
         description: description.trim(),
         urgency: 'MEDIUM' as ComplaintUrgency,
-      });
+      }, files);
       Alert.alert('Réclamation envoyée avec succès.');
       router.replace('/complaints');
     } catch (err: unknown) {

@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ApartmentsModule } from './apartments/apartments.module';
 import { AuthModule } from './auth/auth.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { DocumentsModule } from './documents/documents.module';
 import configuration from './config/configuration';
 import { validateEnv } from './config/env.validation';
 import { HealthModule } from './health/health.module';
@@ -46,6 +47,7 @@ import { UsersModule } from './users/users.module';
     AnnouncementsModule,
     DashboardModule,
     TeamModule,
+    DocumentsModule,
   ],
 })
 export class AppModule {}

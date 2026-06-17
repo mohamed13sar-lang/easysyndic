@@ -6,6 +6,7 @@ import {
   ChevronRight,
   ClipboardList,
   CreditCard,
+  FileText,
   Home,
   LogOut,
   Megaphone,
@@ -297,6 +298,12 @@ export default function SyndicDashboardScreen() {
       subtitle: 'Assemblée, travaux et alertes',
       icon: Megaphone,
       onPress: () => router.push('/syndic/announcements' as never),
+    },
+    {
+      title: 'Documents',
+      subtitle: 'Publier et consulter les fichiers',
+      icon: FileText,
+      onPress: () => router.push('/syndic/documents' as never),
     },
       {
       title: 'Equipe Syndicat',

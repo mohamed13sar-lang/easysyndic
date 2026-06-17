@@ -161,6 +161,15 @@ enum AnnouncementPriority {
   URGENT
 }
 
+enum DocumentType {
+  ASSEMBLEE_GENERALE
+  PV
+  FACTURE
+  TRAVAUX
+  CONTRAT
+  GENERAL
+}
+
 model User {
   id                           String                  @id @default(uuid())
   fullName                     String
@@ -187,6 +196,8 @@ model User {
   notificationsSent            Notification[]          @relation("NotificationsSent")
   notificationsReceived        NotificationRecipient[] @relation("NotificationsReceived")
   announcementsCreated         Announcement[]          @relation("AnnouncementsCreatedBy")
+  documentsUploaded            Document[]              @relation("DocumentsUploadedBy")
+  paymentProofsUploaded        PaymentProof[]          @relation("PaymentProofsUploadedBy")
   pushTokens                   UserPushToken[]         @relation("UserPushTokens")
   teamMemberships              SyndicTeamMember[]      @relation("TeamMemberUser")
   teamInvitationsSent          SyndicTeamMember[]      @relation("TeamMemberInvitedBy")
@@ -213,6 +224,7 @@ model Residence {
   complaints            Complaint[]
   notifications         Notification[]
   announcements         Announcement[]
+  documents             Document[]
   teamMembers           SyndicTeamMember[]
 
   @@index([syndicId])
@@ -394,6 +406,7 @@ model ComplaintMedia {
   id           String             @id @default(uuid())
   complaintId  String
   fileUrl      String
+  storagePath  String?
   fileType     ComplaintMediaType
   fileName     String?
   mimeType     String?
@@ -407,6 +420,29 @@ model ComplaintMedia {
   @@index([complaintId])
   @@index([fileType])
   @@index([uploadedById])
+}
+
+model Document {
+  id           String       @id @default(uuid())
+  title        String
+  description  String?
+  type         DocumentType
+  fileName     String
+  mimeType     String
+  size         Int?
+  storagePath  String
+  residenceId  String
+  uploadedById String
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  residence  Residence @relation(fields: [residenceId], references: [id])
+  uploadedBy User      @relation("DocumentsUploadedBy", fields: [uploadedById], references: [id])
+
+  @@index([residenceId])
+  @@index([uploadedById])
+  @@index([type])
+  @@index([createdAt])
 }
 
 model ComplaintComment {
@@ -446,11 +482,12 @@ model Payment {
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
 
-  residence    Residence            @relation(fields: [residenceId], references: [id])
-  apartment    Apartment            @relation(fields: [apartmentId], references: [id])
-  resident     User                 @relation("ResidentPayments", fields: [residentId], references: [id])
-  createdBy    User                 @relation("PaymentsCreatedBy", fields: [createdById], references: [id])
-  transactions PaymentTransaction[]
+  residence     Residence            @relation(fields: [residenceId], references: [id])
+  apartment     Apartment            @relation(fields: [apartmentId], references: [id])
+  resident      User                 @relation("ResidentPayments", fields: [residentId], references: [id])
+  createdBy     User                 @relation("PaymentsCreatedBy", fields: [createdById], references: [id])
+  transactions  PaymentTransaction[]
+  paymentProofs PaymentProof[]
 
   @@unique([apartmentId, month, year])
   @@index([residenceId])
@@ -492,6 +529,24 @@ model PaymentTransaction {
   @@index([status])
   @@index([paidAt])
   @@index([isActive])
+}
+
+model PaymentProof {
+  id           String   @id @default(uuid())
+  paymentId    String
+  fileName     String
+  mimeType     String
+  size         Int?
+  storagePath  String
+  uploadedById String
+  createdAt    DateTime @default(now())
+
+  payment    Payment @relation(fields: [paymentId], references: [id])
+  uploadedBy User    @relation("PaymentProofsUploadedBy", fields: [uploadedById], references: [id])
+
+  @@index([paymentId])
+  @@index([uploadedById])
+  @@index([createdAt])
 }
 
 model ExpenseInvoice {

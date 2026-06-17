@@ -31,6 +31,26 @@ class EnvironmentVariables {
   @IsInt()
   @Min(1)
   APP_PORT?: number;
+
+  @IsOptional()
+  @IsString()
+  SUPABASE_URL?: string;
+
+  @IsOptional()
+  @IsString()
+  SUPABASE_SERVICE_ROLE_KEY?: string;
+
+  @IsOptional()
+  @IsString()
+  SUPABASE_STORAGE_BUCKET_DOCUMENTS?: string;
+
+  @IsOptional()
+  @IsString()
+  SUPABASE_STORAGE_BUCKET_COMPLAINT_MEDIA?: string;
+
+  @IsOptional()
+  @IsString()
+  SUPABASE_STORAGE_BUCKET_PAYMENT_PROOFS?: string;
 }
 
 export function validateEnv(config: Record<string, unknown>) {

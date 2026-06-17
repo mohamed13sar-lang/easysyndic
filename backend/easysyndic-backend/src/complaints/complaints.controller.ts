@@ -8,9 +8,13 @@ import {
   Patch,
   Post,
   Query,
+  UploadedFiles,
   Put,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 import { UserRole } from '@prisma/client';
 import {
   ApiBearerAuth,
@@ -165,13 +169,24 @@ export class ComplaintsController {
 
   @Post('me/complaints')
   @Roles(UserRole.RESIDENT)
+  @UseInterceptors(FilesInterceptor('files', 5, { storage: memoryStorage() }))
   @ApiOperation({ summary: 'Create complaint for current resident apartment' })
   @ApiCreatedResponse({ type: ComplaintResponseEntity })
   createMyComplaint(
     @Body() dto: CreateMyComplaintDto,
+    @UploadedFiles() files: Array<{
+      originalname?: string;
+      mimetype?: string;
+      size?: number;
+      buffer?: Buffer;
+    }> = [],
     @CurrentUser() currentUser: AuthUser,
   ) {
-    return this.complaintsService.createMyComplaint(dto, currentUser);
+    return this.complaintsService.createMyComplaintWithFiles(
+      dto,
+      files,
+      currentUser,
+    );
   }
 
   @Get('me/complaints/:id')

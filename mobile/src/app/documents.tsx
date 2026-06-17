@@ -1,69 +1,114 @@
+import { Download, FileText, Search } from 'lucide-react-native';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
-  Download,
-  FileText,
-  Search,
-} from 'lucide-react-native';
-import { useMemo, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+  ActivityIndicator,
+  Alert,
+  Linking,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { ResidentTabBar, useResidentTabBarInset } from '@/components/ResidentTabBar';
 import { colors } from '@/constants/colors';
+import { useAuth } from '@/hooks/use-auth';
+import { useSelectedResidence } from '@/hooks/use-selected-residence';
+import { ApiError } from '@/lib/api/client';
+import {
+  AppDocument,
+  DocumentType,
+  getDocumentSignedUrl,
+  getMyDocuments,
+} from '@/services/documents-service';
 
-type FilterType = 'Tous' | 'Reglement' | 'PV' | 'Factures' | 'Contrats';
+type FilterType = 'Tous' | 'Reglement' | 'PV' | 'Factures' | 'Contrats' | 'Autres';
 
-const documents = [
-  {
-    id: '1',
-    title: 'Reglement interieur',
-    type: 'Reglement',
-    date: '12 Mai 2026',
-    size: '1.2 MB',
-  },
-  {
-    id: '2',
-    title: 'PV Assemblee Generale',
-    type: 'PV',
-    date: '08 Mai 2026',
-    size: '2.4 MB',
-  },
-  {
-    id: '3',
-    title: 'Facture entretien ascenseur',
-    type: 'Factures',
-    date: '02 Mai 2026',
-    size: '850 KB',
-  },
-  {
-    id: '4',
-    title: 'Contrat nettoyage',
-    type: 'Contrats',
-    date: '28 Avril 2026',
-    size: '1.8 MB',
-  },
-];
+const typeLabels: Record<DocumentType, FilterType> = {
+  ASSEMBLEE_GENERALE: 'PV',
+  PV: 'PV',
+  FACTURE: 'Factures',
+  TRAVAUX: 'Autres',
+  CONTRAT: 'Contrats',
+  GENERAL: 'Reglement',
+};
 
 export default function DocumentsScreen() {
+  const { token } = useAuth();
+  const { selectedResidence } = useSelectedResidence();
   const [search, setSearch] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterType>('Tous');
+  const [documents, setDocuments] = useState<AppDocument[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
   const tabBarInset = useResidentTabBarInset();
+
+  const loadDocuments = useCallback(async () => {
+    if (!token) return;
+    setIsLoading(true);
+    setError('');
+    try {
+      const data = await getMyDocuments(token, selectedResidence?.id);
+      setDocuments(data);
+    } catch (err: unknown) {
+      setError(
+        err instanceof ApiError ? err.message : 'Impossible de charger les documents.',
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  }, [selectedResidence?.id, token]);
+
+  useEffect(() => {
+    loadDocuments();
+  }, [loadDocuments]);
 
   const filteredDocuments = useMemo(() => {
     const term = search.trim().toLowerCase();
     return documents.filter((doc) => {
-      const byFilter = activeFilter === 'Tous' || doc.type === activeFilter;
+      const label = typeLabels[doc.type] ?? 'Autres';
+      const byFilter = activeFilter === 'Tous' || label === activeFilter;
       const bySearch =
         term.length === 0 ||
         doc.title.toLowerCase().includes(term) ||
-        doc.type.toLowerCase().includes(term);
+        label.toLowerCase().includes(term);
       return byFilter && bySearch;
     });
-  }, [activeFilter, search]);
+  }, [activeFilter, documents, search]);
 
   const typeStyle = (type: string) => {
     if (type === 'Reglement') return { bg: colors.blueLight, color: colors.blue };
     if (type === 'PV') return { bg: colors.purpleLight, color: colors.purple };
     if (type === 'Factures') return { bg: colors.warningLight, color: colors.warning };
     return { bg: colors.successLight, color: colors.success };
+  };
+
+  const formatSize = (size: number) => {
+    if (size >= 1024 * 1024) return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+    if (size >= 1024) return `${Math.round(size / 1024)} KB`;
+    return `${size} B`;
+  };
+
+  const formatDate = (value: string) =>
+    new Intl.DateTimeFormat('fr-FR', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    }).format(new Date(value));
+
+  const openDocument = async (doc: AppDocument) => {
+    if (!token) return;
+    try {
+      const { url } = await getDocumentSignedUrl(token, doc.id);
+      await Linking.openURL(url);
+    } catch (err: unknown) {
+      Alert.alert(
+        'Document indisponible',
+        err instanceof ApiError ? err.message : 'Impossible d ouvrir ce document.',
+      );
+    }
   };
 
   return (
@@ -92,7 +137,7 @@ export default function DocumentsScreen() {
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.chipsRow}>
-          {(['Tous', 'Reglement', 'PV', 'Factures', 'Contrats'] as FilterType[]).map((chip) => {
+          {(['Tous', 'Reglement', 'PV', 'Factures', 'Contrats', 'Autres'] as FilterType[]).map((chip) => {
             const active = chip === activeFilter;
             return (
               <Pressable
@@ -105,37 +150,57 @@ export default function DocumentsScreen() {
           })}
         </ScrollView>
 
+        {isLoading && (
+          <View style={styles.stateCard}>
+            <ActivityIndicator color={colors.primary} />
+            <Text style={styles.stateText}>Chargement des documents...</Text>
+          </View>
+        )}
+
+        {!isLoading && !!error && (
+          <View style={styles.stateCard}>
+            <Text style={styles.errorText}>{error}</Text>
+            <Pressable style={styles.retryButton} onPress={loadDocuments}>
+              <Text style={styles.retryText}>Reessayer</Text>
+            </Pressable>
+          </View>
+        )}
+
         <View style={styles.list}>
-          {filteredDocuments.map((doc) => {
-            const style = typeStyle(doc.type);
-            return (
-              <Pressable
-                key={doc.id}
-                style={styles.card}
-                onPress={() => Alert.alert('Ouverture bientôt disponible.')}>
-                <View style={styles.cardLeft}>
-                  <View style={styles.fileIconWrap}>
-                    <FileText size={18} color={colors.primary} strokeWidth={2.1} />
-                  </View>
-                  <View style={styles.cardTextBlock}>
-                    <Text style={styles.cardTitle}>{doc.title}</Text>
-                    <View style={styles.metaRow}>
-                      <View style={[styles.typePill, { backgroundColor: style.bg }]}>
-                        <Text style={[styles.typePillText, { color: style.color }]}>{doc.type}</Text>
+          {!isLoading &&
+            !error &&
+            filteredDocuments.map((doc) => {
+              const label = typeLabels[doc.type] ?? 'Autres';
+              const style = typeStyle(label);
+              return (
+                <Pressable key={doc.id} style={styles.card} onPress={() => openDocument(doc)}>
+                  <View style={styles.cardLeft}>
+                    <View style={styles.fileIconWrap}>
+                      <FileText size={18} color={colors.primary} strokeWidth={2.1} />
+                    </View>
+                    <View style={styles.cardTextBlock}>
+                      <Text style={styles.cardTitle}>{doc.title}</Text>
+                      <View style={styles.metaRow}>
+                        <View style={[styles.typePill, { backgroundColor: style.bg }]}>
+                          <Text style={[styles.typePillText, { color: style.color }]}>{label}</Text>
+                        </View>
+                        <Text style={styles.metaText}>{formatDate(doc.createdAt)}</Text>
+                        <Text style={styles.metaText}>{formatSize(doc.size)}</Text>
                       </View>
-                      <Text style={styles.metaText}>{doc.date}</Text>
-                      <Text style={styles.metaText}>{doc.size}</Text>
                     </View>
                   </View>
-                </View>
-                <Pressable
-                  style={styles.downloadButton}
-                  onPress={() => Alert.alert('Téléchargement bientôt disponible.')}>
-                  <Download size={16} color={colors.primary} strokeWidth={2.2} />
+                  <Pressable style={styles.downloadButton} onPress={() => openDocument(doc)}>
+                    <Download size={16} color={colors.primary} strokeWidth={2.2} />
+                  </Pressable>
                 </Pressable>
-              </Pressable>
-            );
-          })}
+              );
+            })}
+
+          {!isLoading && !error && filteredDocuments.length === 0 && (
+            <View style={styles.stateCard}>
+              <Text style={styles.stateText}>Aucun document disponible.</Text>
+            </View>
+          )}
         </View>
 
         <View style={styles.spacer} />
@@ -281,6 +346,39 @@ const styles = StyleSheet.create({
     backgroundColor: '#F9FAFB',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  stateCard: {
+    marginTop: 12,
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.white,
+    padding: 18,
+    alignItems: 'center',
+    gap: 10,
+  },
+  stateText: {
+    color: colors.muted,
+    fontSize: 13,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  errorText: {
+    color: colors.danger,
+    fontSize: 13,
+    fontWeight: '700',
+    textAlign: 'center',
+  },
+  retryButton: {
+    borderRadius: 12,
+    backgroundColor: colors.primary,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+  },
+  retryText: {
+    color: colors.white,
+    fontSize: 12,
+    fontWeight: '800',
   },
   spacer: {
     height: 8,
