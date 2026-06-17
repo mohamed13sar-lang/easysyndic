@@ -1,13 +1,16 @@
 import { Stack, usePathname, useRouter } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
 import type { ErrorBoundaryProps } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { Component, ReactNode, useEffect } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider } from '@/auth/AuthContext';
 import { getApiConfigError } from '@/config/runtime';
 import { colors } from '@/constants/colors';
 import { useAuth } from '@/hooks/use-auth';
+
+void SplashScreen.preventAutoHideAsync().catch(() => {});
 
 export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
   return (
@@ -20,7 +23,7 @@ export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
           alignItems: 'center',
           justifyContent: 'center',
         }}>
-        <Text style={{ fontSize: 20, fontWeight: '700', color: '#111827', textAlign: 'center' }}>
+        <Text style={{ fontSize: 20, fontWeight: '700', color: '#1F2328', textAlign: 'center' }}>
           Une erreur est survenue
         </Text>
         <Text style={{ marginTop: 10, color: '#6B7280', textAlign: 'center' }}>
@@ -57,8 +60,17 @@ const residentRoutes = [
   '/complaints',
 ];
 
+const syndicRoles = new Set([
+  'SYNDIC',
+  'VICE_SYNDIC',
+  'CAISSIER',
+  'CASHIER',
+  'GARDIEN',
+  'SECRETAIRE',
+]);
+
 function getRoleHome(role?: string) {
-  if (role === 'SYNDIC') {
+  if (role && syndicRoles.has(role)) {
     return '/syndic/dashboard';
   }
 
@@ -90,7 +102,7 @@ class GlobalRenderBoundary extends Component<
           <StatusBar style="dark" />
           <View style={styles.configErrorScreen}>
             <Text style={styles.configErrorTitle}>Une erreur est survenue</Text>
-            <Text style={styles.configErrorText}>Veuillez redémarrer l'application</Text>
+            <Text style={styles.configErrorText}>Veuillez redémarrer l&apos;application</Text>
           </View>
         </SafeAreaProvider>
       );
@@ -142,7 +154,7 @@ function RouteGuard() {
       return;
     }
 
-    if (user?.role === 'SYNDIC' && isResidentRoute(pathname)) {
+    if (user?.role && syndicRoles.has(user.role) && isResidentRoute(pathname)) {
       console.log('[route-guard] redirect target:', '/syndic/dashboard');
       router.replace('/syndic/dashboard');
     }
@@ -155,6 +167,12 @@ function AppStack() {
   const { connectionError, isLoading } = useAuth();
   const apiConfigError = getApiConfigError();
 
+  useEffect(() => {
+    if (!isLoading || apiConfigError) {
+      void SplashScreen.hideAsync().catch(() => {});
+    }
+  }, [apiConfigError, isLoading]);
+
   if (apiConfigError) {
     return (
       <SafeAreaProvider>
@@ -162,7 +180,7 @@ function AppStack() {
         <View style={styles.configErrorScreen}>
           <Text style={styles.configErrorTitle}>Configuration requise</Text>
           <Text style={styles.configErrorText}>
-            {apiConfigError} Configurez EXPO_PUBLIC_API_URL dans EAS puis reconstruisez l'APK.
+            {apiConfigError} Configurez EXPO_PUBLIC_API_URL dans EAS puis reconstruisez l&apos;APK.
           </Text>
         </View>
       </SafeAreaProvider>
@@ -207,12 +225,11 @@ function AppStack() {
         <Stack.Screen name="syndic/complaints" />
         <Stack.Screen name="syndic/notifications" />
         <Stack.Screen name="syndic/announcements" />
+        <Stack.Screen name="syndic/assistant" />
+        <Stack.Screen name="syndic/team" />
+        <Stack.Screen name="syndic/team/new" />
+        <Stack.Screen name="syndic/team/[id]" />
       </Stack>
-      {isLoading && (
-        <View style={styles.loadingOverlay}>
-          <ActivityIndicator color={colors.primary} />
-        </View>
-      )}
     </SafeAreaProvider>
   );
 }
@@ -228,16 +245,6 @@ export default function RootLayout() {
 }
 
 const styles = StyleSheet.create({
-  loadingOverlay: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-    backgroundColor: colors.white,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   connectionBanner: {
     position: 'absolute',
     top: 12,

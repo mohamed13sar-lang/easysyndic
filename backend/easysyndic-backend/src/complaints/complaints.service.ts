@@ -14,7 +14,11 @@ import { CreateMyComplaintDto } from './dto/create-my-complaint.dto';
 import { UpdateComplaintStatusDto } from './dto/update-complaint-status.dto';
 import { UpdateComplaintDto } from './dto/update-complaint.dto';
 
-type AuthUser = { id: string; role: UserRole };
+type AuthUser = {
+  id: string;
+  role: UserRole;
+  permissionChecked?: { residenceId: string };
+};
 
 @Injectable()
 export class ComplaintsService {
@@ -113,6 +117,8 @@ export class ComplaintsService {
       );
     } else if (currentUser.role === UserRole.SYNDIC) {
       this.assertSyndicResidenceAccess(currentUser.id, residence.syndicId);
+    } else if (currentUser.permissionChecked?.residenceId === residenceId) {
+      // Access was granted by PermissionsGuard for this request.
     } else if (currentUser.role !== UserRole.SUPER_ADMIN) {
       throw new ForbiddenException('Forbidden');
     }
@@ -178,6 +184,8 @@ export class ComplaintsService {
     const residence = await this.getResidenceOrThrow(residenceId);
     if (currentUser.role === UserRole.SYNDIC) {
       this.assertSyndicResidenceAccess(currentUser.id, residence.syndicId);
+    } else if (currentUser.permissionChecked?.residenceId === residenceId) {
+      // Access was granted by PermissionsGuard for this request.
     } else if (currentUser.role !== UserRole.SUPER_ADMIN) {
       throw new ForbiddenException('Forbidden');
     }
@@ -497,6 +505,11 @@ export class ComplaintsService {
         currentUser.id,
         complaint.residence.syndicId,
       );
+      return;
+    }
+    if (
+      currentUser.permissionChecked?.residenceId === complaint.residence.id
+    ) {
       return;
     }
     if (

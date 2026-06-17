@@ -21,6 +21,8 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
+import { RequirePermission } from '../team/decorators/require-permission.decorator';
+import { PermissionsGuard } from '../team/guards/permissions.guard';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { RegisterPushTokenDto } from './dto/register-push-token.dto';
 import { SendPaymentReminderDto } from './dto/send-payment-reminder.dto';
@@ -32,13 +34,14 @@ type AuthUser = { id: string; role: UserRole };
 
 @ApiTags('Notifications')
 @ApiBearerAuth('JWT-auth')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
 @Controller()
 export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
   @Post('residences/:residenceId/notifications')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC, UserRole.VICE_SYNDIC, UserRole.SECRETAIRE)
+  @RequirePermission('notifications', 'send')
   @ApiOperation({ summary: 'Create notification for a residence target scope' })
   @ApiCreatedResponse({ type: NotificationResponseEntity })
   create(
@@ -54,7 +57,8 @@ export class NotificationsController {
   }
 
   @Get('residences/:residenceId/notifications')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC, UserRole.VICE_SYNDIC, UserRole.SECRETAIRE)
+  @RequirePermission('notifications', 'view')
   @ApiOperation({ summary: 'List notifications by residence' })
   @ApiOkResponse({ type: NotificationResponseEntity, isArray: true })
   findByResidence(
@@ -65,7 +69,8 @@ export class NotificationsController {
   }
 
   @Post('residences/:residenceId/notifications/non-paid')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC, UserRole.CASHIER)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC, UserRole.VICE_SYNDIC, UserRole.CAISSIER, UserRole.CASHIER)
+  @RequirePermission('notifications', 'send')
   @ApiOperation({ summary: 'Send non-paid payment reminders' })
   @ApiCreatedResponse({ type: NotificationResponseEntity })
   sendNonPaid(
@@ -150,7 +155,11 @@ export class NotificationsController {
   @Roles(
     UserRole.SUPER_ADMIN,
     UserRole.SYNDIC,
+    UserRole.VICE_SYNDIC,
+    UserRole.CAISSIER,
     UserRole.CASHIER,
+    UserRole.GARDIEN,
+    UserRole.SECRETAIRE,
     UserRole.RESIDENT,
   )
   @ApiOperation({ summary: 'Register Expo push token for current user' })

@@ -18,6 +18,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { ResidentsModule } from './residents/residents.module';
 import { ResidencesModule } from './residences/residences.module';
 import { StatementsModule } from './statements/statements.module';
+import { TeamModule } from './team/team.module';
 import { UsersModule } from './users/users.module';
 
 @Module({
@@ -44,6 +45,7 @@ import { UsersModule } from './users/users.module';
     NotificationsModule,
     AnnouncementsModule,
     DashboardModule,
+    TeamModule,
   ],
 })
 export class AppModule {}

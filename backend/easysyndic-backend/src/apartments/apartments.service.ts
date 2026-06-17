@@ -13,6 +13,7 @@ import { UpdateApartmentDto } from './dto/update-apartment.dto';
 type AuthenticatedUser = {
   id: string;
   role: UserRole;
+  permissionChecked?: { residenceId: string };
 };
 
 @Injectable()
@@ -468,7 +469,7 @@ export class ApartmentsService {
 
   private assertResidenceAccess(
     currentUser: AuthenticatedUser,
-    residence: { syndicId: string },
+    residence: { id?: string; syndicId: string },
   ) {
     if (currentUser.role === UserRole.SUPER_ADMIN) {
       return;
@@ -477,6 +478,13 @@ export class ApartmentsService {
     if (
       currentUser.role === UserRole.SYNDIC &&
       residence.syndicId === currentUser.id
+    ) {
+      return;
+    }
+
+    if (
+      currentUser.permissionChecked &&
+      (!residence.id || currentUser.permissionChecked.residenceId === residence.id)
     ) {
       return;
     }

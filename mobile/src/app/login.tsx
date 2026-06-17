@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
-import { Building2, Home, ShieldCheck } from 'lucide-react-native';
+import { Building2, Home } from 'lucide-react-native';
 import { StyleSheet, Text, View } from 'react-native';
+import { BrandLogo } from '@/components/BrandLogo';
 import {
   ActionCard,
   AppHeader,
@@ -9,17 +10,16 @@ import {
   StatusBadge,
 } from '@/components/premium';
 import { colors } from '@/constants/colors';
+import { brandCopy } from '@/constants/assets';
 import { spacing, typography } from '@/constants/design';
 
 export default function LoginScreen() {
   return (
-    <AppScreen contentStyle={styles.content}>
-      <View style={styles.brandMark}>
-        <ShieldCheck size={28} color={colors.primary} strokeWidth={2.2} />
-      </View>
+    <AppScreen keyboardAvoiding contentStyle={styles.content}>
+      <BrandLogo containerStyle={styles.logoWrap} />
+      <Text style={styles.slogan}>{brandCopy.slogan}</Text>
 
       <AppHeader
-        eyebrow="EasySyndic"
         title="Connexion"
         subtitle="Choisissez votre espace pour accéder à votre résidence en toute sécurité."
       />
@@ -56,13 +56,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     flexGrow: 1,
   },
-  brandMark: {
-    width: 58,
-    height: 58,
-    borderRadius: 18,
-    backgroundColor: colors.primaryLight,
-    alignItems: 'center',
-    justifyContent: 'center',
+  logoWrap: {
+    marginBottom: spacing.xl,
+  },
+  slogan: {
+    ...typography.caption,
+    color: colors.charcoal,
+    marginTop: -spacing.lg,
     marginBottom: spacing.xl,
   },
   heroCard: {

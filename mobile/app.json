@@ -4,11 +4,11 @@
     "slug": "easy-syndic",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/LOGO (2).png",
     "scheme": "mobile",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/images/LOGO (2).png"
     },
     "android": {
       "package": "com.easysyndic.mobile",
@@ -19,33 +19,40 @@
         "READ_EXTERNAL_STORAGE"
       ],
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "backgroundColor": "#FFFFFF",
+        "foregroundImage": "./assets/images/LOGO (2).png"
       },
       "predictiveBackGestureEnabled": false
     },
     "web": {
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/LOGO (2).png"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#FFFFFF",
+          "image": "./assets/images/LOGO (7).png",
+          "imageWidth": 220,
           "android": {
-            "image": "./assets/images/splash-icon.png",
-            "imageWidth": 76
+            "backgroundColor": "#FFFFFF",
+            "image": "./assets/images/LOGO (7).png",
+            "imageWidth": 220
+          },
+          "ios": {
+            "backgroundColor": "#FFFFFF",
+            "image": "./assets/images/LOGO (7).png",
+            "imageWidth": 220
           }
         }
       ],
       "expo-secure-store",
       "expo-audio",
       "expo-image",
-      "expo-asset"
+      "expo-asset",
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true

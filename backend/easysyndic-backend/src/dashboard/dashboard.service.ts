@@ -7,16 +7,23 @@ import {
 } from '@prisma/client';
 import { normalizePayment } from '../payments/payments.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { PermissionMap } from '../team/permissions.types';
+import { TeamPermissionsService } from '../team/team-permissions.service';
 
 @Injectable()
 export class DashboardService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly permissionsService: TeamPermissionsService,
+  ) {}
 
   async getSyndicStats(currentUser: { id: string; role: UserRole }) {
+    const accessibleResidenceIds =
+      await this.permissionsService.getAccessibleResidenceIds(currentUser);
     const residenceWhere =
-      currentUser.role === UserRole.SYNDIC
-        ? { syndicId: currentUser.id, isActive: true }
-        : { isActive: true };
+      currentUser.role === UserRole.SUPER_ADMIN
+        ? { isActive: true }
+        : { id: { in: accessibleResidenceIds ?? [] }, isActive: true };
 
     const residenceIds = await this.prisma.residence.findMany({
       where: residenceWhere,
@@ -90,7 +97,7 @@ export class DashboardService {
       )
       .filter((payment) => unpaidStatuses.includes(payment.status));
 
-    return {
+    const response = {
       totalResidences: scopedResidenceIds.length,
       totalApartments,
       totalResidents: residentRows.length,
@@ -102,6 +109,47 @@ export class DashboardService {
       openComplaintsCount,
       resolvedComplaintsCount,
       notificationsSentCount,
+    };
+
+    return this.filterSyndicStats(response, currentUser, scopedResidenceIds);
+  }
+
+  private async filterSyndicStats(
+    stats: {
+      totalResidences: number;
+      totalApartments: number;
+      totalResidents: number;
+      unpaidPaymentsCount: number;
+      unpaidPaymentsAmount: number;
+      openComplaintsCount: number;
+      resolvedComplaintsCount: number;
+      notificationsSentCount: number;
+    },
+    currentUser: { id: string; role: UserRole },
+    residenceIds: string[],
+  ) {
+    if (currentUser.role === UserRole.SUPER_ADMIN || currentUser.role === UserRole.SYNDIC) {
+      return stats;
+    }
+
+    const memberships = await this.prisma.syndicTeamMember.findMany({
+      where: { userId: currentUser.id, residenceId: { in: residenceIds }, isActive: true },
+      select: { permissions: true },
+    });
+    const can = (action: string) =>
+      memberships.some((membership) =>
+        Boolean((membership.permissions as PermissionMap)?.dashboard?.[action]),
+      );
+
+    return {
+      totalResidences: can('viewDashboard') ? stats.totalResidences : 0,
+      totalApartments: can('viewApartmentsKpi') ? stats.totalApartments : 0,
+      totalResidents: can('viewResidentsKpi') ? stats.totalResidents : 0,
+      unpaidPaymentsCount: can('viewUnpaidKpi') ? stats.unpaidPaymentsCount : 0,
+      unpaidPaymentsAmount: can('viewUnpaidKpi') ? stats.unpaidPaymentsAmount : 0,
+      openComplaintsCount: can('viewComplaintsKpi') ? stats.openComplaintsCount : 0,
+      resolvedComplaintsCount: can('viewComplaintsKpi') ? stats.resolvedComplaintsCount : 0,
+      notificationsSentCount: can('viewDashboard') ? stats.notificationsSentCount : 0,
     };
   }
 

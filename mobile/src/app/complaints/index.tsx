@@ -1,14 +1,9 @@
 import { router, useFocusEffect } from 'expo-router';
 import {
-  ClipboardList,
-  CreditCard,
   Droplets,
-  FileText,
-  Home,
   Lightbulb,
   Plus,
   Search,
-  User,
   Wrench,
 } from 'lucide-react-native';
 import { useCallback, useMemo, useState } from 'react';
@@ -22,6 +17,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { ResidentTabBar, useResidentTabBarInset } from '@/components/ResidentTabBar';
 import { colors } from '@/constants/colors';
 import { useAuth } from '@/hooks/use-auth';
 import { useSelectedResidence } from '@/hooks/use-selected-residence';
@@ -76,25 +72,6 @@ function formatDate(value: string) {
     month: 'short',
     year: 'numeric',
   }).format(new Date(value));
-}
-
-function BottomTab({
-  title,
-  active,
-  onPress,
-  icon: Icon,
-}: {
-  title: string;
-  active?: boolean;
-  onPress: () => void;
-  icon: React.ComponentType<{ size?: number; color?: string; strokeWidth?: number }>;
-}) {
-  return (
-    <Pressable style={styles.bottomTab} onPress={onPress}>
-      <Icon size={20} color={active ? colors.primary : '#9CA3AF'} strokeWidth={2.2} />
-      <Text style={[styles.bottomTabText, active && styles.bottomTabTextActive]}>{title}</Text>
-    </Pressable>
-  );
 }
 
 export default function ComplaintsScreen() {
@@ -195,12 +172,13 @@ export default function ComplaintsScreen() {
 
   const showLoading = isLoading || isResidenceLoading;
   const shownError = error || residenceError;
+  const tabBarInset = useResidentTabBarInset();
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingBottom: tabBarInset + 24 }]}
         showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <View>
@@ -322,13 +300,7 @@ export default function ComplaintsScreen() {
         <View style={styles.spacer} />
       </ScrollView>
 
-      <View style={styles.tabBar}>
-        <BottomTab title="Accueil" icon={Home} onPress={() => router.push('/home')} />
-        <BottomTab title="Réclamations" icon={ClipboardList} active onPress={() => {}} />
-        <BottomTab title="Paiements" icon={CreditCard} onPress={() => router.push('/payments')} />
-        <BottomTab title="Documents" icon={FileText} onPress={() => router.push('/documents')} />
-        <BottomTab title="Profil" icon={User} onPress={() => router.push('/profile')} />
-      </View>
+      <ResidentTabBar active="complaints" />
     </SafeAreaView>
   );
 }
@@ -344,7 +316,6 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: 24,
     paddingTop: 16,
-    paddingBottom: 120,
   },
   header: {
     flexDirection: 'row',
@@ -542,33 +513,5 @@ const styles = StyleSheet.create({
   },
   spacer: {
     height: 8,
-  },
-  tabBar: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: colors.white,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    paddingHorizontal: 10,
-    paddingTop: 8,
-    paddingBottom: 12,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  bottomTab: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-  },
-  bottomTabText: {
-    color: '#9CA3AF',
-    fontSize: 11,
-    fontWeight: '600',
-  },
-  bottomTabTextActive: {
-    color: colors.primary,
   },
 });

@@ -27,6 +27,8 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
+import { RequirePermission } from '../team/decorators/require-permission.decorator';
+import { PermissionsGuard } from '../team/guards/permissions.guard';
 import { AssignApartmentDto } from './dto/assign-apartment.dto';
 import { CreateResidentDto } from './dto/create-resident.dto';
 import { UpdateResidentApartmentStatusDto } from './dto/update-resident-apartment-status.dto';
@@ -42,13 +44,22 @@ type AuthenticatedUser = {
 
 @ApiTags('Residents')
 @ApiBearerAuth('JWT-auth')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC)
+@UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
+@Roles(
+  UserRole.SUPER_ADMIN,
+  UserRole.SYNDIC,
+  UserRole.VICE_SYNDIC,
+  UserRole.CAISSIER,
+  UserRole.CASHIER,
+  UserRole.GARDIEN,
+  UserRole.SECRETAIRE,
+)
 @Controller()
 export class ResidentsController {
   constructor(private readonly residentsService: ResidentsService) {}
 
   @Post('syndic/residences/:residenceId/residents')
+  @RequirePermission('residents', 'create')
   @ApiOperation({
     summary: 'Create a resident and assign apartment in syndic residence',
   })
@@ -73,6 +84,7 @@ export class ResidentsController {
   }
 
   @Get('syndic/residences/:residenceId/residents')
+  @RequirePermission('residents', 'view')
   @ApiOperation({ summary: 'List residents by syndic residence' })
   @ApiParam({ name: 'residenceId', format: 'uuid' })
   @ApiOkResponse({ type: ResidentResponseEntity, isArray: true })
@@ -84,6 +96,7 @@ export class ResidentsController {
   }
 
   @Post('syndic/residences/:residenceId/residents/:residentId/assign-apartment')
+  @RequirePermission('residents', 'edit')
   @ApiOperation({ summary: 'Assign apartment to resident in syndic residence' })
   @ApiParam({ name: 'residenceId', format: 'uuid' })
   @ApiParam({ name: 'residentId', format: 'uuid' })

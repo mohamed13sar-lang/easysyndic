@@ -12,7 +12,18 @@ import {
   Zap,
 } from 'lucide-react-native';
 import { useState } from 'react';
-import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import {
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppButton } from '@/components/AppButton';
 import { colors } from '@/constants/colors';
@@ -21,15 +32,9 @@ import { formatApartmentLabel, useSelectedResidence } from '@/hooks/use-selected
 import { ApiError } from '@/lib/api/client';
 import {
   ComplaintCategory,
-  CreateComplaintMediaInput,
   ComplaintUrgency,
   createMyComplaint,
 } from '@/services/complaints-service';
-import {
-  uploadComplaintAudio,
-  uploadComplaintImage,
-  UploadedFile,
-} from '@/services/storage-service';
 
 const categories = [
   { key: 'Plomberie', value: 'EAU' as ComplaintCategory, icon: Droplets },
@@ -170,8 +175,8 @@ export default function ComplaintNewScreen() {
       Alert.alert('Veuillez saisir un titre.');
       return;
     }
-    if (!description.trim() && !audioUri) {
-      Alert.alert('Description requise', 'Ajoutez une description ou un message vocal.');
+    if (description.trim().length < 5) {
+      Alert.alert('Description requise', 'Ajoutez une description d au moins 5 caracteres.');
       return;
     }
 
@@ -179,49 +184,14 @@ export default function ComplaintNewScreen() {
     setIsSubmitting(true);
 
     try {
-      const uploadedImages: UploadedFile[] = [];
-      for (const image of selectedImages) {
-        uploadedImages.push(
-          await uploadComplaintImage({
-            uri: image.uri,
-            fileName: image.fileName,
-            mimeType: image.mimeType,
-            size: image.fileSize,
-          }),
-        );
-      }
-
-      const uploadedMedia: CreateComplaintMediaInput[] = uploadedImages.map((file) => ({
-        url: file.url,
-        type: 'IMAGE',
-        fileName: file.fileName,
-        mimeType: file.mimeType,
-        size: file.size ?? undefined,
-      }));
-
-      if (audioUri) {
-        const audio = await uploadComplaintAudio({
-          uri: audioUri,
-          fileName: `message-vocal-${Date.now()}.m4a`,
-          mimeType: 'audio/m4a',
-        });
-        uploadedMedia.push({
-          url: audio.url,
-          type: 'AUDIO',
-          fileName: audio.fileName,
-          mimeType: audio.mimeType,
-          size: audio.size ?? undefined,
-        });
-      }
-
+      // TODO: send selectedImages/audioUri when the backend exposes multipart upload.
       await createMyComplaint(token, {
         residenceId: selectedResidence.id,
         apartmentId: selectedResidence.apartment.id,
         category,
         title: title.trim(),
-        description: description.trim() || 'Message vocal',
+        description: description.trim(),
         urgency: 'MEDIUM' as ComplaintUrgency,
-        media: uploadedMedia,
       });
       Alert.alert('Réclamation envoyée avec succès.');
       router.replace('/complaints');
@@ -239,6 +209,9 @@ export default function ComplaintNewScreen() {
   };
 
   return (
+    <KeyboardAvoidingView
+      style={styles.keyboardAvoiding}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.header}>
         <Pressable style={styles.backRow} onPress={() => router.replace('/complaints')}>
@@ -321,7 +294,13 @@ export default function ComplaintNewScreen() {
           textAlignVertical="top"
         />
 
-        <Text style={styles.label}>Medias</Text>
+        <Text style={styles.label}>Medias optionnels</Text>
+        <View style={styles.mediaNotice}>
+          <Text style={styles.mediaNoticeText}>
+            Les photos et audios restent en apercu local pour le moment. La reclamation sera envoyee
+            avec le titre et la description.
+          </Text>
+        </View>
         <Pressable style={styles.uploadCard} onPress={choosePhotoSource}>
           <View style={styles.uploadIconWrap}>
             <Camera size={22} color={colors.primary} strokeWidth={2.1} />
@@ -340,7 +319,7 @@ export default function ComplaintNewScreen() {
             {recording ? 'Arreter l enregistrement' : 'Enregistrer un message vocal'}
           </Text>
           <Text style={styles.uploadSubtitle}>
-            {audioUri ? `Message vocal - ${formatDuration(audioDuration)}` : 'Description ou audio obligatoire'}
+            {audioUri ? `Message vocal - ${formatDuration(audioDuration)}` : 'Optionnel, apercu local uniquement'}
           </Text>
         </Pressable>
 
@@ -396,10 +375,14 @@ export default function ComplaintNewScreen() {
         </View>
       </ScrollView>
     </SafeAreaView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
+  keyboardAvoiding: {
+    flex: 1,
+  },
   safeArea: {
     flex: 1,
     backgroundColor: colors.background,
@@ -579,6 +562,20 @@ const styles = StyleSheet.create({
     color: colors.muted,
     fontSize: 13,
     fontWeight: '500',
+  },
+  mediaNotice: {
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: colors.warningLight,
+    backgroundColor: '#FFFBEB',
+    padding: 12,
+    marginBottom: 10,
+  },
+  mediaNoticeText: {
+    color: '#92400E',
+    fontSize: 12,
+    lineHeight: 17,
+    fontWeight: '700',
   },
   previewCard: {
     marginTop: 12,

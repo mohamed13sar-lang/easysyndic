@@ -2,6 +2,7 @@ import { router } from 'expo-router';
 import { ChevronLeft, MessageSquareText } from 'lucide-react-native';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { BrandLogo } from '@/components/BrandLogo';
 import {
   AppHeader,
   AppScreen,
@@ -42,11 +43,13 @@ export default function ResidentLoginScreen() {
   };
 
   return (
-    <AppScreen contentStyle={styles.content}>
+    <AppScreen keyboardAvoiding contentStyle={styles.content}>
       <Pressable style={styles.backRow} onPress={() => router.replace('/login')}>
         <ChevronLeft size={18} color={colors.text} />
         <Text style={styles.backText}>Retour</Text>
       </Pressable>
+
+      <BrandLogo containerStyle={styles.logoWrap} />
 
       <View style={styles.iconBox}>
         <MessageSquareText size={28} color={colors.primary} strokeWidth={2.2} />
@@ -90,12 +93,11 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   backRow: {
-    position: 'absolute',
-    top: spacing.xl,
-    left: spacing.xl,
+    alignSelf: 'flex-start',
     flexDirection: 'row',
     alignItems: 'center',
     gap: 2,
+    marginBottom: spacing.xl,
   },
   backText: {
     color: colors.text,
@@ -110,6 +112,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.xl,
+  },
+  logoWrap: {
+    marginBottom: spacing.lg,
   },
   formCard: {
     gap: spacing.md,

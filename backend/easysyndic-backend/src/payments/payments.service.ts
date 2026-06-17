@@ -15,13 +15,18 @@ import {
 } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { TeamPermissionsService } from '../team/team-permissions.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { CreatePaymentTransactionDto } from './dto/create-payment-transaction.dto';
 import { DeclarePaymentDto } from './dto/declare-payment.dto';
 import { UpdatePaymentStatusDto } from './dto/update-payment-status.dto';
 import { UpdatePaymentDto } from './dto/update-payment.dto';
 
-type AuthUser = { id: string; role: UserRole };
+type AuthUser = {
+  id: string;
+  role: UserRole;
+  permissionChecked?: { residenceId: string };
+};
 type PaymentSummaryStatus = 'DEBT' | 'BALANCED' | 'CREDIT';
 const PAYMENT_NOT_FOUND = 'Paiement introuvable ou non autorisé';
 const TRANSACTIONS_UNAVAILABLE =
@@ -94,6 +99,7 @@ export class PaymentsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notificationsService: NotificationsService,
+    private readonly permissionsService: TeamPermissionsService,
   ) {}
 
   async findMyPayments(
@@ -671,7 +677,7 @@ export class PaymentsService {
       payments.map((payment) => payment.id),
     );
 
-    return payments.map((payment) =>
+    const response = payments.map((payment) =>
       this.toPaymentResponse({
         ...payment,
         ...(transactionsByPaymentId
@@ -679,6 +685,8 @@ export class PaymentsService {
           : {}),
       }),
     );
+
+    return this.filterPaymentResponses(response, residenceId, currentUser);
   }
 
   async findNonPaidByResidence(residenceId: string, currentUser: AuthUser) {
@@ -730,7 +738,7 @@ export class PaymentsService {
       payments.map((payment) => payment.id),
     );
 
-    return payments
+    const response = payments
       .map((payment) =>
         this.toPaymentResponse({
           ...payment,
@@ -740,6 +748,8 @@ export class PaymentsService {
         }),
       )
       .filter((payment) => this.isUnpaidPaymentResponse(payment));
+
+    return this.filterPaymentResponses(response, residenceId, currentUser);
   }
 
   async findOne(id: string, currentUser: AuthUser) {
@@ -786,12 +796,14 @@ export class PaymentsService {
       payment.id,
     ]);
 
-    return this.toPaymentResponse({
+    const response = this.toPaymentResponse({
       ...payment,
       ...(transactionsByPaymentId
         ? { transactions: transactionsByPaymentId.get(payment.id) ?? [] }
         : {}),
     });
+
+    return this.filterPaymentResponse(response, payment.residenceId, currentUser);
   }
 
   async update(id: string, dto: UpdatePaymentDto, currentUser: AuthUser) {
@@ -1245,6 +1257,7 @@ export class PaymentsService {
     if (currentUser.role === UserRole.SUPER_ADMIN) return;
     if (currentUser.role === UserRole.SYNDIC && syndicId === currentUser.id)
       return;
+    if (currentUser.permissionChecked) return;
     if (currentUser.role === UserRole.CASHIER) {
       // TODO: replace with cashier-residence assignment table check when available.
       if (!createdById || createdById === currentUser.id) return;
@@ -1373,6 +1386,81 @@ export class PaymentsService {
   }) {
     if (!payment.transactions) return payment.amountPaid;
     return this.sumValidatedTransactionResponses(payment.transactions);
+  }
+
+  private async filterPaymentResponses<T extends Record<string, unknown>>(
+    payments: T[],
+    residenceId: string,
+    currentUser: AuthUser,
+  ) {
+    return Promise.all(
+      payments.map((payment) =>
+        this.filterPaymentResponse(payment, residenceId, currentUser),
+      ),
+    );
+  }
+
+  private async filterPaymentResponse<T extends Record<string, unknown>>(
+    payment: T,
+    residenceId: string,
+    currentUser: AuthUser,
+  ) {
+    if (
+      currentUser.role === UserRole.SUPER_ADMIN ||
+      currentUser.role === UserRole.SYNDIC ||
+      currentUser.role === UserRole.RESIDENT
+    ) {
+      return payment;
+    }
+
+    const [canSeeAmount, canSeeProof, canSeeHistory] = await Promise.all([
+      this.permissionsService.hasPermission(
+        currentUser.id,
+        residenceId,
+        'payments',
+        'viewAmount',
+      ),
+      this.permissionsService.hasPermission(
+        currentUser.id,
+        residenceId,
+        'payments',
+        'viewProofImage',
+      ),
+      this.permissionsService.hasPermission(
+        currentUser.id,
+        residenceId,
+        'payments',
+        'viewHistory',
+      ),
+    ]);
+
+    const masked = {
+      ...payment,
+      amountDue: canSeeAmount ? payment.amountDue : null,
+      amountPaid: canSeeAmount ? payment.amountPaid : null,
+      remainingAmount: canSeeAmount ? payment.remainingAmount : null,
+      receiptUrl: canSeeProof ? payment.receiptUrl : null,
+      transactions: canSeeHistory
+        ? (payment.transactions as unknown[] | undefined)?.map((transaction) =>
+            canSeeProof && canSeeAmount
+              ? transaction
+              : {
+                  ...(transaction as Record<string, unknown>),
+                  amount: canSeeAmount
+                    ? (transaction as Record<string, unknown>).amount
+                    : null,
+                  receiptUrl: canSeeProof
+                    ? (transaction as Record<string, unknown>).receiptUrl
+                    : null,
+                  proofUrl: canSeeProof
+                    ? (transaction as Record<string, unknown>).proofUrl
+                    : null,
+                },
+          )
+        : [],
+    };
+
+    return masked;
   }
 
   private sumValidatedTransactionResponses(

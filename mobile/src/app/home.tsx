@@ -1,14 +1,11 @@
 import { router, useFocusEffect } from 'expo-router';
 import {
   Bell,
-  ClipboardList,
   CreditCard,
   Droplets,
   FileText,
-  Home,
   Megaphone,
   PlusCircle,
-  User,
   Wrench,
 } from 'lucide-react-native';
 import {
@@ -21,6 +18,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCallback, useMemo, useState } from 'react';
+import { ResidentTabBar, useResidentTabBarInset } from '@/components/ResidentTabBar';
+import { BrandLogo } from '@/components/BrandLogo';
 import { colors } from '@/constants/colors';
 import { useAuth } from '@/hooks/use-auth';
 import { formatApartmentLabel, useSelectedResidence } from '@/hooks/use-selected-residence';
@@ -38,6 +37,11 @@ import {
   ResidentPayment,
   ResidentPaymentSummary,
 } from '@/services/payments-service';
+import {
+  ComplaintStatus as ApiComplaintStatus,
+  getMyComplaints,
+  ResidentComplaint,
+} from '@/services/complaints-service';
 
 type ComplaintStatus = 'En cours' | 'Resolu';
 
@@ -60,13 +64,6 @@ type AnnouncementItemProps = {
   item: Announcement;
 };
 
-type BottomTabProps = {
-  title: string;
-  icon: React.ComponentType<{ size?: number; color?: string; strokeWidth?: number }>;
-  active?: boolean;
-  onPress: () => void;
-};
-
 function formatCurrency(amount: number) {
   return `${amount.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} MAD`;
 }
@@ -84,6 +81,10 @@ function formatPaymentStatus(status?: PaymentStatus) {
   if (status === 'EXONERE') return 'Exonéré';
   if (status === 'NON_PAYE') return 'Non payé';
   return 'Aucun paiement';
+}
+
+function resolveComplaintStatus(status: ApiComplaintStatus): ComplaintStatus {
+  return status === 'RESOLUE' || status === 'FERMEE' ? 'Resolu' : 'En cours';
 }
 
 const emptyPaymentSummary: ResidentPaymentSummary = {
@@ -231,15 +232,6 @@ function AnnouncementItem({ item }: AnnouncementItemProps) {
   );
 }
 
-function BottomTab({ title, icon: Icon, active = false, onPress }: BottomTabProps) {
-  return (
-    <Pressable style={styles.bottomTab} onPress={onPress}>
-      <Icon size={20} color={active ? colors.primary : '#9CA3AF'} strokeWidth={2.2} />
-      <Text style={[styles.bottomTabText, active && styles.bottomTabTextActive]}>{title}</Text>
-    </Pressable>
-  );
-}
-
 export default function HomeScreen() {
   const { token, user } = useAuth();
   const { selectedResidence, isLoading } = useSelectedResidence();
@@ -247,8 +239,10 @@ export default function HomeScreen() {
   const [paymentSummary, setPaymentSummary] =
     useState<ResidentPaymentSummary>(emptyPaymentSummary);
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [complaints, setComplaints] = useState<ResidentComplaint[]>([]);
   const [paymentsError, setPaymentsError] = useState('');
   const [announcementsError, setAnnouncementsError] = useState('');
+  const [complaintsError, setComplaintsError] = useState('');
   const [isAnnouncementsLoading, setIsAnnouncementsLoading] = useState(false);
   const firstName = user?.fullName.split(' ').filter(Boolean)[0] ?? 'Resident';
   const residenceLabel = selectedResidence
@@ -258,6 +252,7 @@ export default function HomeScreen() {
       : 'Aucune résidence liée';
   const latestPayment = payments[0] ?? null;
   const balancePresentation = getBalancePresentation(paymentSummary);
+  const tabBarInset = useResidentTabBarInset();
 
   const loadPayments = useCallback(async () => {
     if (!token || !selectedResidence) {
@@ -327,24 +322,50 @@ export default function HomeScreen() {
     }
   }, [selectedResidence, token]);
 
+  const loadComplaints = useCallback(async () => {
+    if (!token || !selectedResidence) {
+      setComplaints([]);
+      setComplaintsError('');
+      return;
+    }
+
+    try {
+      setComplaintsError('');
+      const data = await getMyComplaints(token, {
+        residenceId: selectedResidence.id,
+        apartmentId: selectedResidence.apartment.id,
+      });
+      setComplaints(data.slice(0, 3));
+    } catch (err: unknown) {
+      setComplaints([]);
+      setComplaintsError(
+        err instanceof ApiError ? err.message : 'Impossible de charger les réclamations.',
+      );
+    }
+  }, [selectedResidence, token]);
+
   useFocusEffect(
     useCallback(() => {
       loadPayments();
       loadAnnouncements();
-    }, [loadAnnouncements, loadPayments]),
+      loadComplaints();
+    }, [loadAnnouncements, loadComplaints, loadPayments]),
   );
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingBottom: tabBarInset + 24 }]}
         showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
-          <Pressable onPress={() => router.push('/residence/details')}>
-            <Text style={styles.greeting}>Bonjour, {firstName}</Text>
-            <Text style={styles.subGreeting}>{residenceLabel}</Text>
-          </Pressable>
+          <View style={styles.headerLeft}>
+            <BrandLogo variant="mark" />
+            <Pressable style={styles.headerTextWrap} onPress={() => router.push('/residence/details')}>
+              <Text style={styles.greeting}>Bonjour, {firstName}</Text>
+              <Text style={styles.subGreeting}>{residenceLabel}</Text>
+            </Pressable>
+          </View>
           <Pressable style={styles.bellButton} onPress={() => router.push('/notifications')}>
             <Bell size={20} color={colors.text} strokeWidth={2.1} />
             <View style={styles.bellDot} />
@@ -429,36 +450,65 @@ export default function HomeScreen() {
           />
         </View>
 
-        <Text style={styles.sectionTitle}>Réclamations récentes</Text>
+        <Text style={styles.sectionTitle}>Derniers paiements</Text>
         <View style={styles.sectionList}>
-          <ComplaintItem
-            title="Fuite d'eau cuisine"
-            status="En cours"
-            date="24 Mai 2026"
-            icon={Droplets}
-          />
-          <ComplaintItem
-            title="Problème ascenseur"
-            status="Resolu"
-            date="20 Mai 2026"
-            icon={Wrench}
-          />
+          {paymentsError ? (
+            <View style={styles.emptyAnnouncementCard}>
+              <Text style={styles.emptyAnnouncementText}>{paymentsError}</Text>
+            </View>
+          ) : payments.length > 0 ? (
+            payments.slice(0, 3).map((payment) => (
+              <Pressable
+                key={payment.id}
+                style={styles.paymentMiniCard}
+                onPress={() =>
+                  router.push({ pathname: '/payments/[id]', params: { id: payment.id } })
+                }>
+                <View style={styles.paymentMiniCopy}>
+                  <Text style={styles.complaintTitle}>
+                    Charges {payment.month}/{payment.year}
+                  </Text>
+                  <Text style={styles.complaintDate}>{formatPaymentStatus(payment.status)}</Text>
+                </View>
+                <Text style={styles.paymentMiniAmount}>
+                  {formatCurrency(payment.remainingAmount)}
+                </Text>
+              </Pressable>
+            ))
+          ) : (
+            <View style={styles.emptyAnnouncementCard}>
+              <Text style={styles.emptyAnnouncementText}>Aucun paiement recent.</Text>
+            </View>
+          )}
+        </View>
+
+        <Text style={styles.sectionTitle}>Reclamations recentes</Text>
+        <View style={styles.sectionList}>
+          {complaintsError ? (
+            <View style={styles.emptyAnnouncementCard}>
+              <Text style={styles.emptyAnnouncementText}>{complaintsError}</Text>
+            </View>
+          ) : complaints.length > 0 ? (
+            complaints.map((complaint) => (
+              <ComplaintItem
+                key={complaint.id}
+                title={complaint.title}
+                status={resolveComplaintStatus(complaint.status)}
+                date={formatAnnouncementDate(complaint.createdAt)}
+                icon={complaint.category === 'EAU' ? Droplets : Wrench}
+              />
+            ))
+          ) : (
+            <View style={styles.emptyAnnouncementCard}>
+              <Text style={styles.emptyAnnouncementText}>Aucune reclamation recente.</Text>
+            </View>
+          )}
         </View>
 
         <View style={styles.spacer} />
       </ScrollView>
 
-      <View style={styles.tabBar}>
-        <BottomTab title="Accueil" icon={Home} active onPress={() => router.push('/home')} />
-        <BottomTab
-          title="Réclamations"
-          icon={ClipboardList}
-          onPress={() => router.push('/complaints')}
-        />
-        <BottomTab title="Paiements" icon={CreditCard} onPress={() => router.push('/payments')} />
-        <BottomTab title="Documents" icon={FileText} onPress={() => router.push('/documents')} />
-        <BottomTab title="Profil" icon={User} onPress={() => router.push('/profile')} />
-      </View>
+      <ResidentTabBar active="home" />
     </SafeAreaView>
   );
 }
@@ -474,13 +524,24 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: 24,
     paddingTop: 16,
-    paddingBottom: 120,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 18,
+  },
+  headerLeft: {
+    flex: 1,
+    minWidth: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingRight: 12,
+  },
+  headerTextWrap: {
+    flex: 1,
+    minWidth: 0,
   },
   greeting: {
     color: colors.text,
@@ -659,6 +720,26 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  paymentMiniCard: {
+    backgroundColor: colors.white,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  paymentMiniCopy: {
+    flex: 1,
+    minWidth: 0,
+  },
+  paymentMiniAmount: {
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: '800',
+  },
   complaintLeft: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -796,33 +877,5 @@ const styles = StyleSheet.create({
   },
   spacer: {
     height: 8,
-  },
-  tabBar: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: colors.white,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    paddingHorizontal: 10,
-    paddingTop: 8,
-    paddingBottom: 12,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  bottomTab: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-  },
-  bottomTabText: {
-    color: '#9CA3AF',
-    fontSize: 11,
-    fontWeight: '600',
-  },
-  bottomTabTextActive: {
-    color: colors.primary,
   },
 });

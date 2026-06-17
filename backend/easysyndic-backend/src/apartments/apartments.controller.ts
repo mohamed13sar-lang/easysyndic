@@ -27,6 +27,8 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
+import { RequirePermission } from '../team/decorators/require-permission.decorator';
+import { PermissionsGuard } from '../team/guards/permissions.guard';
 import { ApartmentsService } from './apartments.service';
 import { CreateApartmentDto } from './dto/create-apartment.dto';
 import { UpdateApartmentStatusDto } from './dto/update-apartment-status.dto';
@@ -40,13 +42,22 @@ type AuthenticatedUser = {
 
 @ApiTags('Apartments')
 @ApiBearerAuth('JWT-auth')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC)
+@UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
+@Roles(
+  UserRole.SUPER_ADMIN,
+  UserRole.SYNDIC,
+  UserRole.VICE_SYNDIC,
+  UserRole.CAISSIER,
+  UserRole.CASHIER,
+  UserRole.GARDIEN,
+  UserRole.SECRETAIRE,
+)
 @Controller()
 export class ApartmentsController {
   constructor(private readonly apartmentsService: ApartmentsService) {}
 
   @Get('syndic/residences/:residenceId/apartments')
+  @RequirePermission('apartments', 'view')
   @ApiOperation({ summary: 'List apartments for syndic residence' })
   @ApiParam({ name: 'residenceId', format: 'uuid' })
   @ApiOkResponse({ type: ApartmentResponseEntity, isArray: true })
@@ -61,6 +72,7 @@ export class ApartmentsController {
   }
 
   @Post('syndic/residences/:residenceId/apartments')
+  @RequirePermission('apartments', 'create')
   @ApiOperation({ summary: 'Create apartment for syndic residence' })
   @ApiParam({ name: 'residenceId', format: 'uuid' })
   @ApiCreatedResponse({ type: ApartmentResponseEntity })
@@ -83,6 +95,7 @@ export class ApartmentsController {
   }
 
   @Get('syndic/residences/:residenceId/apartments/:apartmentId')
+  @RequirePermission('apartments', 'view')
   @ApiOperation({ summary: 'Get apartment details for syndic residence' })
   @ApiParam({ name: 'residenceId', format: 'uuid' })
   @ApiParam({ name: 'apartmentId', format: 'uuid' })
@@ -103,6 +116,7 @@ export class ApartmentsController {
   }
 
   @Get('syndic/residences/:residenceId/apartments/:apartmentId/profile')
+  @RequirePermission('apartments', 'view')
   @ApiOperation({ summary: 'Get apartment profile for syndic residence' })
   @ApiParam({ name: 'residenceId', format: 'uuid' })
   @ApiParam({ name: 'apartmentId', format: 'uuid' })
@@ -123,6 +137,7 @@ export class ApartmentsController {
   }
 
   @Patch('syndic/residences/:residenceId/apartments/:apartmentId')
+  @RequirePermission('apartments', 'edit')
   @ApiOperation({ summary: 'Update apartment for syndic residence' })
   @ApiParam({ name: 'residenceId', format: 'uuid' })
   @ApiParam({ name: 'apartmentId', format: 'uuid' })
@@ -145,6 +160,7 @@ export class ApartmentsController {
   }
 
   @Patch('syndic/residences/:residenceId/apartments/:apartmentId/status')
+  @RequirePermission('apartments', 'edit')
   @ApiOperation({ summary: 'Update apartment active status for syndic residence' })
   @ApiParam({ name: 'residenceId', format: 'uuid' })
   @ApiParam({ name: 'apartmentId', format: 'uuid' })
@@ -164,6 +180,7 @@ export class ApartmentsController {
   }
 
   @Delete('syndic/residences/:residenceId/apartments/:apartmentId')
+  @RequirePermission('apartments', 'delete')
   @ApiOperation({
     summary: 'Soft delete apartment for syndic residence (set isActive=false)',
   })

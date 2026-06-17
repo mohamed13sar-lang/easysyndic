@@ -20,7 +20,11 @@ import {
 import { RegisterPushTokenDto } from './dto/register-push-token.dto';
 import { SendPaymentReminderDto } from './dto/send-payment-reminder.dto';
 
-type AuthUser = { id: string; role: UserRole };
+type AuthUser = {
+  id: string;
+  role: UserRole;
+  permissionChecked?: { residenceId: string };
+};
 type PaymentNotificationEvent =
   | 'PENDING_VALIDATION'
   | 'VALIDATED'
@@ -576,6 +580,9 @@ export class NotificationsService {
       residence.syndicId === currentUser.id
     )
       return residence;
+    if (currentUser.permissionChecked?.residenceId === residenceId) {
+      return residence;
+    }
     if (!allowOnlyAdminSyndic && currentUser.role === UserRole.CASHIER) {
       // TODO: restrict CASHIER by residence assignment table once available.
       return residence;

@@ -1,6 +1,8 @@
 import { ReactNode } from 'react';
 import {
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
   Pressable,
   ScrollView,
   StyleProp,
@@ -18,6 +20,8 @@ import { layout, radius, shadows, spacing, typography } from '@/constants/design
 type ScreenProps = {
   children: ReactNode;
   scroll?: boolean;
+  keyboardAvoiding?: boolean;
+  bottomInset?: number;
   contentStyle?: StyleProp<ViewStyle>;
 };
 
@@ -53,10 +57,20 @@ type StateProps = {
   action?: ReactNode;
 };
 
-export function AppScreen({ children, scroll = true, contentStyle }: ScreenProps) {
-  const content = <View style={[styles.content, contentStyle]}>{children}</View>;
+export function AppScreen({
+  children,
+  scroll = true,
+  keyboardAvoiding = false,
+  bottomInset = 0,
+  contentStyle,
+}: ScreenProps) {
+  const content = (
+    <View style={[styles.content, { paddingBottom: spacing.xxxl + bottomInset }, contentStyle]}>
+      {children}
+    </View>
+  );
 
-  return (
+  const body = (
     <SafeAreaView style={styles.safeArea}>
       {scroll ? (
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
@@ -66,6 +80,18 @@ export function AppScreen({ children, scroll = true, contentStyle }: ScreenProps
         content
       )}
     </SafeAreaView>
+  );
+
+  if (!keyboardAvoiding) {
+    return body;
+  }
+
+  return (
+    <KeyboardAvoidingView
+      style={styles.keyboardAvoiding}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      {body}
+    </KeyboardAvoidingView>
   );
 }
 
@@ -95,6 +121,8 @@ export function PremiumCard({ children, style, onPress }: CardProps) {
 
   return <View style={[styles.card, style]}>{children}</View>;
 }
+
+export const AppCard = PremiumCard;
 
 export function StatCard({
   title,
@@ -157,6 +185,10 @@ export function SecondaryButton(props: ButtonProps) {
   return <AppButtonBase {...props} tone={props.tone ?? 'secondary'} />;
 }
 
+export function AppButton(props: ButtonProps) {
+  return <AppButtonBase {...props} tone={props.tone ?? 'primary'} />;
+}
+
 function AppButtonBase({ title, onPress, loading, disabled, tone = 'primary' }: ButtonProps) {
   const isDisabled = disabled || loading;
 
@@ -197,6 +229,8 @@ export function FormInput(props: TextInputProps & { label?: string; error?: stri
   );
 }
 
+export const AppInput = FormInput;
+
 export function SectionTitle({ title, action }: { title: string; action?: ReactNode }) {
   return (
     <View style={styles.sectionHeader}>
@@ -225,6 +259,140 @@ export function LoadingState({ message }: { message: string }) {
   );
 }
 
+export function ErrorState({ title = 'Une erreur est survenue', message, action }: StateProps) {
+  return (
+    <PremiumCard style={styles.stateCard}>
+      <Text style={styles.stateTitle}>{title}</Text>
+      <Text style={[styles.stateMessage, styles.errorMessage]}>{message}</Text>
+      {action}
+    </PremiumCard>
+  );
+}
+
+export function BalanceCard({
+  label,
+  amount,
+  helper,
+  status,
+  action,
+  tone = 'neutral',
+}: {
+  label: string;
+  amount: string;
+  helper?: string;
+  status?: string;
+  action?: ReactNode;
+  tone?: 'neutral' | 'success' | 'danger';
+}) {
+  return (
+    <PremiumCard style={[styles.balanceCard, balanceToneStyles[tone]]}>
+      <Text style={[styles.balanceLabel, tone !== 'neutral' && styles.balanceTextOnTone]}>{label}</Text>
+      <Text style={[styles.balanceAmount, tone !== 'neutral' && styles.balanceTextOnTone]}>{amount}</Text>
+      {!!status && (
+        <View style={[styles.balanceStatus, tone !== 'neutral' && styles.balanceStatusOnTone]}>
+          <Text style={[styles.balanceStatusText, tone !== 'neutral' && styles.balanceStatusTextOnTone]}>
+            {status}
+          </Text>
+        </View>
+      )}
+      {!!helper && (
+        <Text style={[styles.balanceHelper, tone !== 'neutral' && styles.balanceTextOnTone]}>
+          {helper}
+        </Text>
+      )}
+      {action}
+    </PremiumCard>
+  );
+}
+
+export function AnnouncementCard({
+  title,
+  subtitle,
+  meta,
+  badge,
+  urgent = false,
+  onPress,
+}: {
+  title: string;
+  subtitle?: string;
+  meta?: string;
+  badge?: string;
+  urgent?: boolean;
+  onPress?: () => void;
+}) {
+  return (
+    <PremiumCard onPress={onPress} style={[styles.listCard, urgent && styles.urgentCard]}>
+      <View style={styles.listCardHeader}>
+        <View style={styles.listCardCopy}>
+          {!!badge && <Text style={[styles.listCardBadge, urgent && styles.urgentText]}>{badge}</Text>}
+          <Text style={styles.listCardTitle}>{title}</Text>
+        </View>
+        {urgent && <StatusBadge label="Urgent" tone="danger" />}
+      </View>
+      {!!subtitle && <Text style={styles.listCardBody} numberOfLines={2}>{subtitle}</Text>}
+      {!!meta && <Text style={styles.listCardMeta}>{meta}</Text>}
+    </PremiumCard>
+  );
+}
+
+export function PaymentCard({
+  title,
+  subtitle,
+  amount,
+  status,
+  tone = 'neutral',
+  onPress,
+}: {
+  title: string;
+  subtitle?: string;
+  amount: string;
+  status?: string;
+  tone?: 'neutral' | 'success' | 'warning' | 'danger';
+  onPress?: () => void;
+}) {
+  return (
+    <PremiumCard onPress={onPress} style={styles.listCard}>
+      <View style={styles.listCardHeader}>
+        <View style={styles.listCardCopy}>
+          <Text style={styles.listCardTitle}>{title}</Text>
+          {!!subtitle && <Text style={styles.listCardMeta}>{subtitle}</Text>}
+        </View>
+        {!!status && <StatusBadge label={status} tone={tone === 'neutral' ? 'neutral' : tone} />}
+      </View>
+      <Text style={styles.paymentAmount}>{amount}</Text>
+    </PremiumCard>
+  );
+}
+
+export function ComplaintCard({
+  title,
+  subtitle,
+  meta,
+  status,
+  tone = 'warning',
+  onPress,
+}: {
+  title: string;
+  subtitle?: string;
+  meta?: string;
+  status?: string;
+  tone?: 'neutral' | 'success' | 'warning' | 'danger';
+  onPress?: () => void;
+}) {
+  return (
+    <PremiumCard onPress={onPress} style={styles.listCard}>
+      <View style={styles.listCardHeader}>
+        <View style={styles.listCardCopy}>
+          <Text style={styles.listCardTitle}>{title}</Text>
+          {!!subtitle && <Text style={styles.listCardMeta}>{subtitle}</Text>}
+        </View>
+        {!!status && <StatusBadge label={status} tone={tone} />}
+      </View>
+      {!!meta && <Text style={styles.listCardBody} numberOfLines={2}>{meta}</Text>}
+    </PremiumCard>
+  );
+}
+
 const buttonStyles = StyleSheet.create({
   primary: { backgroundColor: colors.primary },
   secondary: { backgroundColor: colors.primaryLight, borderWidth: 1, borderColor: '#B7D9D3' },
@@ -247,7 +415,16 @@ const badgeTextStyles = StyleSheet.create({
   info: { color: colors.blue },
 });
 
+const balanceToneStyles = StyleSheet.create({
+  neutral: {},
+  success: { backgroundColor: colors.primary, borderColor: colors.primary },
+  danger: { backgroundColor: '#FFF7F7', borderColor: '#FECACA' },
+});
+
 const styles = StyleSheet.create({
+  keyboardAvoiding: {
+    flex: 1,
+  },
   safeArea: {
     flex: 1,
     backgroundColor: colors.background,
@@ -431,5 +608,102 @@ const styles = StyleSheet.create({
     ...typography.body,
     color: colors.muted,
     textAlign: 'center',
+  },
+  errorMessage: {
+    color: colors.danger,
+    fontWeight: '700',
+  },
+  balanceCard: {
+    gap: spacing.sm,
+  },
+  balanceLabel: {
+    color: colors.muted,
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  balanceAmount: {
+    color: colors.text,
+    fontSize: 34,
+    lineHeight: 40,
+    fontWeight: '800',
+  },
+  balanceHelper: {
+    color: colors.muted,
+    fontSize: 13,
+    lineHeight: 19,
+    fontWeight: '600',
+  },
+  balanceTextOnTone: {
+    color: colors.white,
+  },
+  balanceStatus: {
+    alignSelf: 'flex-start',
+    borderRadius: radius.pill,
+    backgroundColor: colors.surfaceAlt,
+    paddingHorizontal: spacing.md,
+    paddingVertical: 6,
+  },
+  balanceStatusOnTone: {
+    backgroundColor: 'rgba(255,255,255,0.18)',
+  },
+  balanceStatusText: {
+    color: colors.text,
+    fontSize: 12,
+    fontWeight: '800',
+  },
+  balanceStatusTextOnTone: {
+    color: colors.white,
+  },
+  listCard: {
+    padding: spacing.lg,
+  },
+  urgentCard: {
+    borderColor: '#FECACA',
+    backgroundColor: '#FFF7F7',
+  },
+  listCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: spacing.md,
+  },
+  listCardCopy: {
+    flex: 1,
+    minWidth: 0,
+  },
+  listCardBadge: {
+    color: colors.primary,
+    fontSize: 12,
+    fontWeight: '800',
+    marginBottom: spacing.xs,
+  },
+  urgentText: {
+    color: colors.danger,
+  },
+  listCardTitle: {
+    color: colors.text,
+    fontSize: 15,
+    lineHeight: 21,
+    fontWeight: '800',
+  },
+  listCardBody: {
+    marginTop: spacing.sm,
+    color: colors.muted,
+    fontSize: 13,
+    lineHeight: 19,
+    fontWeight: '600',
+  },
+  listCardMeta: {
+    marginTop: spacing.xs,
+    color: colors.muted,
+    fontSize: 12,
+    lineHeight: 17,
+    fontWeight: '600',
+  },
+  paymentAmount: {
+    marginTop: spacing.md,
+    color: colors.text,
+    fontSize: 18,
+    fontWeight: '800',
   },
 });

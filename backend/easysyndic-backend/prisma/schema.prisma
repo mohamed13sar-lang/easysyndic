@@ -15,6 +15,10 @@ datasource db {
 enum UserRole {
   SUPER_ADMIN
   SYNDIC
+  VICE_SYNDIC
+  CAISSIER
+  GARDIEN
+  SECRETAIRE
   RESIDENT
   PROVIDER
   CASHIER
@@ -178,12 +182,14 @@ model User {
   financialTransactionsCreated FinancialTransaction[]  @relation("FinancialTransactionsCreatedBy")
   residentComplaints           Complaint[]             @relation("ResidentComplaints")
   assignedComplaints           Complaint[]             @relation("AssignedComplaints")
-  complaintMediaUploaded        ComplaintMedia[]        @relation("ComplaintMediaUploadedBy")
+  complaintMediaUploaded       ComplaintMedia[]        @relation("ComplaintMediaUploadedBy")
   complaintComments            ComplaintComment[]      @relation("ComplaintComments")
   notificationsSent            Notification[]          @relation("NotificationsSent")
   notificationsReceived        NotificationRecipient[] @relation("NotificationsReceived")
   announcementsCreated         Announcement[]          @relation("AnnouncementsCreatedBy")
   pushTokens                   UserPushToken[]         @relation("UserPushTokens")
+  teamMemberships              SyndicTeamMember[]      @relation("TeamMemberUser")
+  teamInvitationsSent          SyndicTeamMember[]      @relation("TeamMemberInvitedBy")
 }
 
 model Residence {
@@ -207,9 +213,32 @@ model Residence {
   complaints            Complaint[]
   notifications         Notification[]
   announcements         Announcement[]
+  teamMembers           SyndicTeamMember[]
 
   @@index([syndicId])
   @@index([city])
+  @@index([isActive])
+}
+
+model SyndicTeamMember {
+  id          String   @id @default(uuid())
+  userId      String
+  residenceId String
+  invitedById String
+  role        UserRole
+  permissions Json
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user      User      @relation("TeamMemberUser", fields: [userId], references: [id])
+  residence Residence @relation(fields: [residenceId], references: [id])
+  invitedBy User      @relation("TeamMemberInvitedBy", fields: [invitedById], references: [id])
+
+  @@unique([userId, residenceId])
+  @@index([residenceId])
+  @@index([invitedById])
+  @@index([role])
   @@index([isActive])
 }
 

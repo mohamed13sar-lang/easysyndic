@@ -1,9 +1,10 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { ChevronLeft, Clock, Phone } from 'lucide-react-native';
 import { useEffect, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { Pressable, StyleSheet, Text, TextInput, useWindowDimensions, View } from 'react-native';
 import { AppButton } from '@/components/AppButton';
+import { BrandLogo } from '@/components/BrandLogo';
+import { AppScreen } from '@/components/premium';
 import { colors } from '@/constants/colors';
 import { radius, shadows, spacing, typography } from '@/constants/design';
 import { useAuth } from '@/hooks/use-auth';
@@ -23,6 +24,8 @@ export default function OtpScreen() {
   const [isResending, setIsResending] = useState(false);
   const [resendIn, setResendIn] = useState(RESEND_SECONDS);
   const inputRef = useRef<TextInput>(null);
+  const { width } = useWindowDimensions();
+  const otpBoxSize = Math.min(46, Math.floor((width - 96) / OTP_LENGTH));
 
   useEffect(() => {
     if (!phone) {
@@ -109,6 +112,7 @@ export default function OtpScreen() {
         onPress={focusInput}
         style={[
           styles.otpBox,
+          { width: otpBoxSize, height: Math.max(50, otpBoxSize + 8) },
           isFilled && styles.otpBoxFilled,
           !isFilled && styles.otpBoxEmpty,
           isCurrent && styles.otpBoxCurrent,
@@ -119,12 +123,13 @@ export default function OtpScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <View style={styles.content}>
+    <AppScreen keyboardAvoiding contentStyle={styles.content}>
         <Pressable style={styles.backRow} onPress={() => router.replace('/resident-login')}>
           <ChevronLeft size={18} color={colors.text} />
           <Text style={styles.backText}>Retour</Text>
         </Pressable>
+
+        <BrandLogo containerStyle={styles.logoWrap} />
 
         <View style={styles.card}>
           <View style={styles.iconBox}>
@@ -174,35 +179,29 @@ export default function OtpScreen() {
             </Pressable>
           </View>
         </View>
-      </View>
-    </SafeAreaView>
+    </AppScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
   content: {
     flex: 1,
-    paddingHorizontal: spacing.xl,
-    paddingTop: spacing.md,
     justifyContent: 'center',
   },
   backRow: {
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'flex-start',
-    position: 'absolute',
-    top: spacing.xl,
-    left: spacing.xl,
+    marginBottom: spacing.xl,
   },
   backText: {
     marginLeft: 2,
     color: colors.text,
     fontSize: 16,
     fontWeight: '500',
+  },
+  logoWrap: {
+    marginBottom: spacing.lg,
   },
   iconBox: {
     width: 56,
@@ -237,8 +236,6 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   otpBox: {
-    width: 46,
-    height: 54,
     borderRadius: 14,
     borderWidth: 1.5,
     alignItems: 'center',

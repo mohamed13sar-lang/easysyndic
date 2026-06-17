@@ -40,9 +40,9 @@ import {
 } from '@/hooks/use-selected-syndic-residence';
 import { ApiError } from '@/lib/api/client';
 
-const accent = '#0F766E';
-const accentSoft = '#E6F4F1';
-const textPrimary = '#111827';
+const accent = '#0FA19A';
+const accentSoft = '#E7F7F6';
+const textPrimary = '#1F2328';
 const textSecondary = '#6B7280';
 const border = '#E5E7EB';
 
@@ -461,7 +461,7 @@ export default function SyndicAnnouncementsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F7F8FA',
+    backgroundColor: '#F8FAFB',
   },
   content: {
     width: '100%',

@@ -158,7 +158,7 @@ export default function SyndicNotificationsScreen() {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <Pressable style={styles.backRow} onPress={() => router.replace('/syndic/dashboard')}>
-            <ChevronLeft size={18} color="#111827" />
+            <ChevronLeft size={18} color="#1F2328" />
             <Text style={styles.backText}>Retour</Text>
           </Pressable>
           <View style={styles.titleRow}>
@@ -261,7 +261,7 @@ export default function SyndicNotificationsScreen() {
                 <Text style={styles.modalTitle}>Nouvelle notification</Text>
               </View>
               <Pressable style={styles.closeButton} onPress={closeCreateModal}>
-                <X size={20} color="#111827" />
+                <X size={20} color="#1F2328" />
               </Pressable>
             </View>
 
@@ -334,7 +334,7 @@ export default function SyndicNotificationsScreen() {
                 <Text style={styles.modalTitle}>{selectedNotification?.title ?? 'Notification'}</Text>
               </View>
               <Pressable style={styles.closeButton} onPress={() => setSelectedNotification(null)}>
-                <X size={20} color="#111827" />
+                <X size={20} color="#1F2328" />
               </Pressable>
             </View>
 
@@ -371,30 +371,30 @@ const styles = StyleSheet.create({
   content: { padding: 24, paddingBottom: 36, width: '100%', maxWidth: 1040, alignSelf: 'center' },
   header: { marginBottom: 16 },
   backRow: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', marginBottom: 18 },
-  backText: { marginLeft: 2, color: '#111827', fontSize: 16, fontWeight: '500' },
+  backText: { marginLeft: 2, color: '#1F2328', fontSize: 16, fontWeight: '500' },
   titleRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', gap: 14, flexWrap: 'wrap' },
-  title: { color: '#111827', fontSize: 28, lineHeight: 34, fontWeight: '800' },
+  title: { color: '#1F2328', fontSize: 28, lineHeight: 34, fontWeight: '800' },
   subtitle: { marginTop: 6, color: '#6B7280', fontSize: 14, lineHeight: 20, fontWeight: '500' },
   primaryAction: { minHeight: 46, borderRadius: 14, backgroundColor: '#18A7A0', paddingHorizontal: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
   primaryActionText: { color: '#FFFFFF', fontSize: 14, fontWeight: '800' },
   totalsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12, marginBottom: 16 },
   totalCard: { minHeight: 94, minWidth: 170, flexGrow: 1, flexBasis: '48%', borderRadius: 20, borderWidth: 1, borderColor: '#E5E7EB', backgroundColor: '#FFFFFF', padding: 16, boxShadow: '0 10px 26px rgba(15, 23, 42, 0.06)', elevation: 2 },
-  totalValue: { color: '#111827', fontSize: 22, fontWeight: '800' },
+  totalValue: { color: '#1F2328', fontSize: 22, fontWeight: '800' },
   totalLabel: { marginTop: 6, color: '#6B7280', fontSize: 13, fontWeight: '700' },
   sectionHeader: { marginBottom: 14, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: 12 },
-  sectionTitle: { color: '#111827', fontSize: 17, fontWeight: '800' },
+  sectionTitle: { color: '#1F2328', fontSize: 17, fontWeight: '800' },
   sectionMeta: { color: '#6B7280', fontSize: 13, fontWeight: '700' },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
   card: { minHeight: 210, minWidth: 260, flexGrow: 1, flexBasis: '31%', borderRadius: 20, borderWidth: 1, borderColor: '#E5E7EB', backgroundColor: '#FFFFFF', padding: 16, boxShadow: '0 12px 30px rgba(15, 23, 42, 0.07)', elevation: 2 },
   cardHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   iconWrap: { width: 38, height: 38, borderRadius: 12, backgroundColor: '#D6F3F1', alignItems: 'center', justifyContent: 'center' },
   badge: { borderRadius: 999, paddingHorizontal: 10, paddingVertical: 5, backgroundColor: '#D6F3F1', color: '#18A7A0', fontSize: 12, fontWeight: '800' },
-  cardTitle: { marginTop: 14, color: '#111827', fontSize: 17, fontWeight: '800' },
-  messageText: { marginTop: 8, color: '#111827', fontSize: 14, lineHeight: 20, fontWeight: '500' },
+  cardTitle: { marginTop: 14, color: '#1F2328', fontSize: 17, fontWeight: '800' },
+  messageText: { marginTop: 8, color: '#1F2328', fontSize: 14, lineHeight: 20, fontWeight: '500' },
   metaText: { marginTop: 6, color: '#6B7280', fontSize: 13, fontWeight: '600' },
   dateText: { marginTop: 10, color: '#9CA3AF', fontSize: 12, fontWeight: '700' },
   stateCard: { minHeight: 150, borderRadius: 20, borderWidth: 1, borderColor: '#E5E7EB', backgroundColor: '#FFFFFF', padding: 18, alignItems: 'center', justifyContent: 'center', gap: 8 },
-  stateTitle: { color: '#111827', fontSize: 15, fontWeight: '800', textAlign: 'center' },
+  stateTitle: { color: '#1F2328', fontSize: 15, fontWeight: '800', textAlign: 'center' },
   stateText: { color: '#6B7280', fontSize: 14, lineHeight: 20, fontWeight: '500', textAlign: 'center' },
   errorText: { color: '#DC2626', fontSize: 14, lineHeight: 20, fontWeight: '600', textAlign: 'center' },
   retryButton: { borderRadius: 12, backgroundColor: '#D6F3F1', paddingHorizontal: 14, paddingVertical: 8 },
@@ -405,12 +405,12 @@ const styles = StyleSheet.create({
   modalHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 16 },
   modalTitleRow: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: 10 },
   modalIconWrap: { width: 40, height: 40, borderRadius: 12, backgroundColor: '#D6F3F1', alignItems: 'center', justifyContent: 'center' },
-  modalTitle: { flex: 1, color: '#111827', fontSize: 20, fontWeight: '800' },
+  modalTitle: { flex: 1, color: '#1F2328', fontSize: 20, fontWeight: '800' },
   closeButton: { width: 38, height: 38, borderRadius: 12, backgroundColor: '#F3F4F6', alignItems: 'center', justifyContent: 'center' },
   modalContent: { gap: 10, paddingBottom: 8 },
-  input: { minHeight: 50, borderRadius: 14, borderWidth: 1, borderColor: '#E5E7EB', backgroundColor: '#F9FAFB', paddingHorizontal: 14, color: '#111827', fontSize: 14, fontWeight: '600' },
+  input: { minHeight: 50, borderRadius: 14, borderWidth: 1, borderColor: '#E5E7EB', backgroundColor: '#F9FAFB', paddingHorizontal: 14, color: '#1F2328', fontSize: 14, fontWeight: '600' },
   textArea: { minHeight: 116, paddingTop: 13, textAlignVertical: 'top' },
-  fieldLabel: { marginTop: 8, marginBottom: 2, color: '#111827', fontSize: 13, fontWeight: '800' },
+  fieldLabel: { marginTop: 8, marginBottom: 2, color: '#1F2328', fontSize: 13, fontWeight: '800' },
   optionGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   smallOption: { minHeight: 38, borderRadius: 12, borderWidth: 1, borderColor: '#E5E7EB', backgroundColor: '#F9FAFB', alignItems: 'center', justifyContent: 'center', paddingHorizontal: 11 },
   smallOptionSelected: { borderColor: '#18A7A0', backgroundColor: '#D6F3F1' },
@@ -419,8 +419,8 @@ const styles = StyleSheet.create({
   formError: { marginTop: 8, color: '#DC2626', fontSize: 13, fontWeight: '600' },
   createButton: { marginTop: 14, height: 50, borderRadius: 14, backgroundColor: '#18A7A0', alignItems: 'center', justifyContent: 'center' },
   createButtonText: { color: '#FFFFFF', fontSize: 15, fontWeight: '800' },
-  detailMessage: { color: '#111827', fontSize: 15, lineHeight: 22, fontWeight: '600', marginBottom: 12 },
+  detailMessage: { color: '#1F2328', fontSize: 15, lineHeight: 22, fontWeight: '600', marginBottom: 12 },
   detailRow: { borderTopWidth: 1, borderTopColor: '#E5E7EB', paddingVertical: 11 },
   detailLabel: { color: '#6B7280', fontSize: 12, fontWeight: '700' },
-  detailValue: { marginTop: 4, color: '#111827', fontSize: 15, fontWeight: '800' },
+  detailValue: { marginTop: 4, color: '#1F2328', fontSize: 15, fontWeight: '800' },
 });

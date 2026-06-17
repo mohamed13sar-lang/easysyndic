@@ -8,6 +8,9 @@
       "distribution": "internal",
       "android": {
         "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://easysyndic-production.up.railway.app"
       }
     },
     "preview": {
@@ -21,6 +24,9 @@
     "production": {
       "android": {
         "buildType": "app-bundle"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://easysyndic-production.up.railway.app"
       }
     }
   }

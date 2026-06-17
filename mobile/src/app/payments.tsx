@@ -2,16 +2,12 @@ import { router, useFocusEffect } from 'expo-router';
 import {
   CalendarDays,
   CheckCircle2,
-  ClipboardList,
-  CreditCard,
-  FileText,
-  Home,
   Receipt,
-  User,
 } from 'lucide-react-native';
 import { useCallback, useMemo, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { ResidentTabBar, useResidentTabBarInset } from '@/components/ResidentTabBar';
 import { colors } from '@/constants/colors';
 import { useAuth } from '@/hooks/use-auth';
 import { useSelectedResidence } from '@/hooks/use-selected-residence';
@@ -38,25 +34,6 @@ const monthNames = [
   'Novembre',
   'Decembre',
 ];
-
-function BottomTab({
-  title,
-  active,
-  onPress,
-  icon: Icon,
-}: {
-  title: string;
-  active?: boolean;
-  onPress: () => void;
-  icon: React.ComponentType<{ size?: number; color?: string; strokeWidth?: number }>;
-}) {
-  return (
-    <Pressable style={styles.bottomTab} onPress={onPress}>
-      <Icon size={20} color={active ? colors.primary : '#9CA3AF'} strokeWidth={2.2} />
-      <Text style={[styles.bottomTabText, active && styles.bottomTabTextActive]}>{title}</Text>
-    </Pressable>
-  );
-}
 
 function formatCurrency(amount: number) {
   return `${amount.toLocaleString('fr-FR', { maximumFractionDigits: 0 })} MAD`;
@@ -200,12 +177,13 @@ export default function PaymentsScreen() {
   const summaryPresentation = getSummaryPresentation(paymentSummary);
   const showLoading = isLoading || isResidenceLoading;
   const shownError = error || residenceError;
+  const tabBarInset = useResidentTabBarInset();
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
         style={styles.scroll}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingBottom: tabBarInset + 24 }]}
         showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <Text style={styles.title}>Paiements</Text>
@@ -284,7 +262,7 @@ export default function PaymentsScreen() {
             <View style={styles.stateCard}>
               <Text style={styles.stateTitle}>Aucun paiement</Text>
               <Text style={styles.stateText}>
-                Vos charges mensuelles apparaitront ici des qu'elles seront creees.
+                Vos charges mensuelles apparaitront ici des qu&apos;elles seront creees.
               </Text>
             </View>
           )}
@@ -390,17 +368,7 @@ export default function PaymentsScreen() {
         <View style={styles.spacer} />
       </ScrollView>
 
-      <View style={styles.tabBar}>
-        <BottomTab title="Accueil" icon={Home} onPress={() => router.push('/home')} />
-        <BottomTab
-          title="Réclamations"
-          icon={ClipboardList}
-          onPress={() => router.push('/complaints')}
-        />
-        <BottomTab title="Paiements" icon={CreditCard} active onPress={() => {}} />
-        <BottomTab title="Documents" icon={FileText} onPress={() => router.push('/documents')} />
-        <BottomTab title="Profil" icon={User} onPress={() => router.push('/profile')} />
-      </View>
+      <ResidentTabBar active="payments" />
     </SafeAreaView>
   );
 }
@@ -416,7 +384,6 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: 24,
     paddingTop: 16,
-    paddingBottom: 120,
   },
   header: {
     marginBottom: 16,
@@ -678,33 +645,5 @@ const styles = StyleSheet.create({
   },
   spacer: {
     height: 8,
-  },
-  tabBar: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: colors.white,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
-    paddingHorizontal: 10,
-    paddingTop: 8,
-    paddingBottom: 12,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  bottomTab: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-  },
-  bottomTabText: {
-    color: '#9CA3AF',
-    fontSize: 11,
-    fontWeight: '600',
-  },
-  bottomTabTextActive: {
-    color: colors.primary,
   },
 });

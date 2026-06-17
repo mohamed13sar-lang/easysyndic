@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { ComplaintStatus, PaymentStatus, UserRole } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { TeamPermissionsService } from '../team/team-permissions.service';
 import { CreateResidenceDto } from './dto/create-residence.dto';
 import { UpdateResidenceStatusDto } from './dto/update-residence-status.dto';
 import { UpdateResidenceDto } from './dto/update-residence.dto';
@@ -17,14 +18,20 @@ type AuthenticatedUser = {
 
 @Injectable()
 export class ResidencesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly permissionsService: TeamPermissionsService,
+  ) {}
 
   async findSyndicResidences(currentUser: AuthenticatedUser) {
+    const accessibleResidenceIds =
+      await this.permissionsService.getAccessibleResidenceIds(currentUser);
+
     const residences = await this.prisma.residence.findMany({
       where:
         currentUser.role === UserRole.SUPER_ADMIN
           ? undefined
-          : { syndicId: currentUser.id },
+          : { id: { in: accessibleResidenceIds ?? [] } },
       orderBy: { createdAt: 'desc' },
       include: {
         _count: {

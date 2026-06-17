@@ -7,6 +7,7 @@ import {
 import { Prisma, ResidentType, UserRole } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
+import { TeamPermissionsService } from '../team/team-permissions.service';
 import { AssignApartmentDto } from './dto/assign-apartment.dto';
 import { CreateResidentDto } from './dto/create-resident.dto';
 import { UpdateResidentApartmentStatusDto } from './dto/update-resident-apartment-status.dto';
@@ -15,11 +16,15 @@ import { UpdateResidentDto } from './dto/update-resident.dto';
 type AuthenticatedUser = {
   id: string;
   role: UserRole;
+  permissionChecked?: { residenceId: string };
 };
 
 @Injectable()
 export class ResidentsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly permissionsService: TeamPermissionsService,
+  ) {}
 
   async create(
     residenceId: string,
@@ -163,7 +168,8 @@ export class ResidentsService {
       orderBy: { createdAt: 'desc' },
     });
 
-    return this.groupResidentLinks(links);
+    const response = this.groupResidentLinks(links);
+    return this.filterResidentResponses(response, residenceId, currentUser);
   }
 
   async findOne(id: string, currentUser: AuthenticatedUser) {
@@ -186,10 +192,14 @@ export class ResidentsService {
       }
     }
 
-    return this.buildResidentResponse(
+    const response = this.buildResidentResponse(
       resident,
       links.map((l) => this.stripApartmentFromLink(l)),
     );
+    const residenceId = links[0]?.apartment.residenceId;
+    return residenceId
+      ? this.filterResidentResponse(response, residenceId, currentUser)
+      : response;
   }
 
   async update(
@@ -373,6 +383,9 @@ export class ResidentsService {
     if (currentUser.role === UserRole.SYNDIC && syndicId === currentUser.id) {
       return;
     }
+    if (currentUser.permissionChecked) {
+      return;
+    }
     throw new ForbiddenException(
       'You can only manage residents in your own residences',
     );
@@ -510,6 +523,59 @@ export class ResidentsService {
     return {
       ...this.sanitizeUser(user),
       residentApartments,
+    };
+  }
+
+  private async filterResidentResponses<T extends Record<string, unknown>>(
+    residents: T[],
+    residenceId: string,
+    currentUser: AuthenticatedUser,
+  ) {
+    return Promise.all(
+      residents.map((resident) =>
+        this.filterResidentResponse(resident, residenceId, currentUser),
+      ),
+    );
+  }
+
+  private async filterResidentResponse<T extends Record<string, unknown>>(
+    resident: T,
+    residenceId: string,
+    currentUser: AuthenticatedUser,
+  ) {
+    if (
+      currentUser.role === UserRole.SUPER_ADMIN ||
+      currentUser.role === UserRole.SYNDIC
+    ) {
+      return resident;
+    }
+
+    const [canSeePhone, canSeeEmail, canSeeApartment] = await Promise.all([
+      this.permissionsService.hasPermission(
+        currentUser.id,
+        residenceId,
+        'residents',
+        'viewPhone',
+      ),
+      this.permissionsService.hasPermission(
+        currentUser.id,
+        residenceId,
+        'residents',
+        'viewEmail',
+      ),
+      this.permissionsService.hasPermission(
+        currentUser.id,
+        residenceId,
+        'residents',
+        'viewApartment',
+      ),
+    ]);
+
+    return {
+      ...resident,
+      phone: canSeePhone ? resident.phone : null,
+      email: canSeeEmail ? resident.email : null,
+      residentApartments: canSeeApartment ? resident.residentApartments : [],
     };
   }
 }

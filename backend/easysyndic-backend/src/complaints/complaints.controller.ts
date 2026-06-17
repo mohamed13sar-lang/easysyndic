@@ -23,6 +23,8 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
+import { RequirePermission } from '../team/decorators/require-permission.decorator';
+import { PermissionsGuard } from '../team/guards/permissions.guard';
 import { ComplaintsService } from './complaints.service';
 import { AddComplaintCommentDto } from './dto/add-complaint-comment.dto';
 import { AddComplaintMediaDto } from './dto/add-complaint-media.dto';
@@ -38,13 +40,14 @@ type AuthUser = { id: string; role: UserRole };
 
 @ApiTags('Complaints')
 @ApiBearerAuth('JWT-auth')
-@UseGuards(JwtAuthGuard, RolesGuard)
+@UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
 @Controller()
 export class ComplaintsController {
   constructor(private readonly complaintsService: ComplaintsService) {}
 
   @Get('syndic/residences/:residenceId/complaints')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC, UserRole.VICE_SYNDIC, UserRole.GARDIEN, UserRole.SECRETAIRE)
+  @RequirePermission('complaints', 'view')
   @ApiOperation({ summary: 'List complaints by syndic residence' })
   @ApiOkResponse({ type: ComplaintResponseEntity, isArray: true })
   findBySyndicResidence(
@@ -55,7 +58,8 @@ export class ComplaintsController {
   }
 
   @Get('syndic/residences/:residenceId/complaints/:complaintId')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC, UserRole.VICE_SYNDIC, UserRole.GARDIEN, UserRole.SECRETAIRE)
+  @RequirePermission('complaints', 'view')
   @ApiOperation({ summary: 'Get complaint by id in syndic residence' })
   @ApiOkResponse({ type: ComplaintResponseEntity })
   findOneBySyndicResidence(
@@ -71,7 +75,8 @@ export class ComplaintsController {
   }
 
   @Patch('syndic/residences/:residenceId/complaints/:complaintId/status')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC, UserRole.VICE_SYNDIC, UserRole.GARDIEN, UserRole.SECRETAIRE)
+  @RequirePermission('complaints', 'updateStatus')
   @ApiOperation({ summary: 'Update complaint status in syndic residence' })
   @ApiOkResponse({ type: ComplaintResponseEntity })
   updateStatusBySyndicResidence(
@@ -89,7 +94,8 @@ export class ComplaintsController {
   }
 
   @Post('syndic/residences/:residenceId/complaints/:complaintId/comments')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC, UserRole.VICE_SYNDIC, UserRole.GARDIEN, UserRole.SECRETAIRE)
+  @RequirePermission('complaints', 'updateStatus')
   @ApiOperation({ summary: 'Add comment to complaint in syndic residence' })
   @ApiCreatedResponse({ type: ComplaintCommentResponseEntity })
   addCommentBySyndicResidence(
@@ -107,7 +113,8 @@ export class ComplaintsController {
   }
 
   @Get('syndic/residences/:residenceId/complaints/:complaintId/media')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC, UserRole.VICE_SYNDIC, UserRole.GARDIEN, UserRole.SECRETAIRE)
+  @RequirePermission('complaints', 'view')
   @ApiOperation({ summary: 'List complaint media in syndic residence' })
   @ApiOkResponse({ type: ComplaintMediaResponseEntity, isArray: true })
   findMediaBySyndicResidence(
@@ -123,7 +130,8 @@ export class ComplaintsController {
   }
 
   @Post('syndic/residences/:residenceId/complaints/:complaintId/media')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC)
+  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC, UserRole.VICE_SYNDIC, UserRole.GARDIEN, UserRole.SECRETAIRE)
+  @RequirePermission('complaints', 'updateStatus')
   @ApiOperation({ summary: 'Add media to complaint in syndic residence' })
   @ApiCreatedResponse({ type: ComplaintMediaResponseEntity })
   addMediaBySyndicResidence(

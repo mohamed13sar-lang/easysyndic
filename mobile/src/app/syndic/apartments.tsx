@@ -278,7 +278,7 @@ export default function SyndicApartmentsScreen() {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <Pressable style={styles.backRow} onPress={() => router.replace('/syndic/dashboard')}>
-            <ChevronLeft size={18} color="#111827" />
+            <ChevronLeft size={18} color="#1F2328" />
             <Text style={styles.backText}>Retour</Text>
           </Pressable>
           <View style={styles.titleRow}>
@@ -379,7 +379,7 @@ export default function SyndicApartmentsScreen() {
                     : `Appartement ${selectedApartment?.number ?? ''}`}
               </Text>
               <Pressable style={styles.closeButton} onPress={closeModal}>
-                <X size={20} color="#111827" />
+                <X size={20} color="#1F2328" />
               </Pressable>
             </View>
 
@@ -521,10 +521,10 @@ const styles = StyleSheet.create({
   content: { padding: 24, paddingBottom: 36, width: '100%', maxWidth: 980, alignSelf: 'center' },
   header: { marginBottom: 16 },
   backRow: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', marginBottom: 18 },
-  backText: { marginLeft: 2, color: '#111827', fontSize: 16, fontWeight: '500' },
+  backText: { marginLeft: 2, color: '#1F2328', fontSize: 16, fontWeight: '500' },
   titleRow: { flexDirection: 'row', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 },
   titleWrap: { flex: 1 },
-  title: { color: '#111827', fontSize: 28, lineHeight: 34, fontWeight: '800' },
+  title: { color: '#1F2328', fontSize: 28, lineHeight: 34, fontWeight: '800' },
   subtitle: { marginTop: 6, color: '#6B7280', fontSize: 14, lineHeight: 20, fontWeight: '500' },
   addButton: { minHeight: 46, borderRadius: 14, backgroundColor: '#18A7A0', paddingHorizontal: 14, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8 },
   addButtonText: { color: '#FFFFFF', fontSize: 14, fontWeight: '800' },
@@ -535,13 +535,13 @@ const styles = StyleSheet.create({
   statusText: { borderRadius: 999, paddingHorizontal: 10, paddingVertical: 5, fontSize: 12, fontWeight: '800' },
   active: { backgroundColor: '#DCFCE7', color: '#16A34A' },
   inactive: { backgroundColor: '#FEE2E2', color: '#DC2626' },
-  cardTitle: { marginTop: 14, color: '#111827', fontSize: 17, fontWeight: '800' },
+  cardTitle: { marginTop: 14, color: '#1F2328', fontSize: 17, fontWeight: '800' },
   metaRow: { marginTop: 10, flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
   metaText: { color: '#6B7280', fontSize: 13, fontWeight: '600' },
-  feeText: { marginTop: 10, color: '#111827', fontSize: 14, fontWeight: '700' },
+  feeText: { marginTop: 10, color: '#1F2328', fontSize: 14, fontWeight: '700' },
   tapHint: { marginTop: 10, color: '#18A7A0', fontSize: 12, fontWeight: '800' },
   stateCard: { minHeight: 140, borderRadius: 18, borderWidth: 1, borderColor: '#E5E7EB', backgroundColor: '#FFFFFF', padding: 18, alignItems: 'center', justifyContent: 'center', gap: 8 },
-  stateTitle: { color: '#111827', fontSize: 15, fontWeight: '800', textAlign: 'center' },
+  stateTitle: { color: '#1F2328', fontSize: 15, fontWeight: '800', textAlign: 'center' },
   stateText: { color: '#6B7280', fontSize: 14, lineHeight: 20, fontWeight: '500', textAlign: 'center' },
   errorText: { color: '#DC2626', fontSize: 14, lineHeight: 20, fontWeight: '600', textAlign: 'center' },
   retryButton: { borderRadius: 12, backgroundColor: '#D6F3F1', paddingHorizontal: 14, paddingVertical: 8 },
@@ -552,16 +552,16 @@ const styles = StyleSheet.create({
   modalBackdrop: { flex: 1, backgroundColor: 'rgba(17, 24, 39, 0.45)', padding: 20, alignItems: 'center', justifyContent: 'center' },
   modalCard: { width: '100%', maxWidth: 620, maxHeight: '92%', borderRadius: 18, backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#E5E7EB', padding: 18 },
   modalHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 16 },
-  modalTitle: { flex: 1, color: '#111827', fontSize: 20, fontWeight: '800' },
+  modalTitle: { flex: 1, color: '#1F2328', fontSize: 20, fontWeight: '800' },
   closeButton: { width: 38, height: 38, borderRadius: 12, backgroundColor: '#F3F4F6', alignItems: 'center', justifyContent: 'center' },
   modalState: { minHeight: 120, alignItems: 'center', justifyContent: 'center' },
   formGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
-  input: { minWidth: 180, flexGrow: 1, flexBasis: '48%', height: 50, borderRadius: 14, borderWidth: 1, borderColor: '#E5E7EB', backgroundColor: '#F9FAFB', paddingHorizontal: 14, color: '#111827', fontSize: 14, fontWeight: '600' },
+  input: { minWidth: 180, flexGrow: 1, flexBasis: '48%', height: 50, borderRadius: 14, borderWidth: 1, borderColor: '#E5E7EB', backgroundColor: '#F9FAFB', paddingHorizontal: 14, color: '#1F2328', fontSize: 14, fontWeight: '600' },
   formError: { marginTop: 10, color: '#DC2626', fontSize: 13, fontWeight: '600' },
   detailsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
   detailItem: { minWidth: 150, flexGrow: 1, flexBasis: '31%', borderRadius: 14, borderWidth: 1, borderColor: '#E5E7EB', backgroundColor: '#F9FAFB', padding: 12 },
   detailLabel: { color: '#6B7280', fontSize: 12, fontWeight: '700' },
-  detailValue: { marginTop: 5, color: '#111827', fontSize: 15, fontWeight: '800' },
+  detailValue: { marginTop: 5, color: '#1F2328', fontSize: 15, fontWeight: '800' },
   primaryButton: { marginTop: 14, height: 50, borderRadius: 14, backgroundColor: '#18A7A0', alignItems: 'center', justifyContent: 'center' },
   primaryButtonText: { color: '#FFFFFF', fontSize: 15, fontWeight: '800' },
   secondaryButton: { minHeight: 44, borderRadius: 14, borderWidth: 1, borderColor: '#18A7A0', backgroundColor: '#D6F3F1', paddingHorizontal: 12, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 7 },

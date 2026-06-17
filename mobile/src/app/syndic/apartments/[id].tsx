@@ -160,7 +160,7 @@ export default function SyndicApartmentProfileScreen() {
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <Pressable style={styles.backButton} onPress={() => router.back()}>
-          <ArrowLeft size={18} color="#111827" />
+          <ArrowLeft size={18} color="#1F2328" />
           <Text style={styles.backText}>Retour</Text>
         </Pressable>
 
@@ -361,12 +361,12 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F9FAFB' },
   content: { width: '100%', maxWidth: 1040, alignSelf: 'center', padding: 24, paddingBottom: 44 },
   backButton: { flexDirection: 'row', alignItems: 'center', alignSelf: 'flex-start', gap: 6, marginBottom: 18 },
-  backText: { color: '#111827', fontSize: 15, fontWeight: '700' },
+  backText: { color: '#1F2328', fontSize: 15, fontWeight: '700' },
   hero: { flexDirection: 'row', alignItems: 'center', gap: 14, borderRadius: 18, borderWidth: 1, borderColor: '#E5E7EB', backgroundColor: '#FFFFFF', padding: 18, marginBottom: 14 },
   heroIcon: { width: 52, height: 52, borderRadius: 16, backgroundColor: '#D6F3F1', alignItems: 'center', justifyContent: 'center' },
   heroText: { flex: 1, minWidth: 0 },
   eyebrow: { color: '#18A7A0', fontSize: 12, fontWeight: '900', textTransform: 'uppercase' },
-  title: { marginTop: 3, color: '#111827', fontSize: 26, lineHeight: 32, fontWeight: '900' },
+  title: { marginTop: 3, color: '#1F2328', fontSize: 26, lineHeight: 32, fontWeight: '900' },
   subtitle: { marginTop: 4, color: '#6B7280', fontSize: 14, fontWeight: '600' },
   badge: { borderRadius: 999, paddingHorizontal: 10, paddingVertical: 6 },
   activeBadge: { backgroundColor: '#DCFCE7' },
@@ -377,20 +377,20 @@ const styles = StyleSheet.create({
   statsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 14 },
   statCard: { flexGrow: 1, flexBasis: '23%', minWidth: 150, borderRadius: 16, borderWidth: 1, borderColor: '#E5E7EB', backgroundColor: '#FFFFFF', padding: 14 },
   statLabel: { color: '#6B7280', fontSize: 12, fontWeight: '800' },
-  statValue: { marginTop: 8, color: '#111827', fontSize: 19, fontWeight: '900' },
+  statValue: { marginTop: 8, color: '#1F2328', fontSize: 19, fontWeight: '900' },
   dangerText: { color: '#DC2626' },
   successText: { color: '#059669' },
   infoGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: 14 },
   infoCard: { flexGrow: 1, flexBasis: '23%', minWidth: 150, borderRadius: 16, borderWidth: 1, borderColor: '#E5E7EB', backgroundColor: '#FFFFFF', padding: 14 },
   infoLabel: { color: '#6B7280', fontSize: 12, fontWeight: '800' },
-  infoValue: { marginTop: 7, color: '#111827', fontSize: 16, fontWeight: '900' },
+  infoValue: { marginTop: 7, color: '#1F2328', fontSize: 16, fontWeight: '900' },
   section: { borderRadius: 18, borderWidth: 1, borderColor: '#E5E7EB', backgroundColor: '#FFFFFF', padding: 16, marginBottom: 14 },
-  sectionTitle: { color: '#111827', fontSize: 17, fontWeight: '900', marginBottom: 12 },
+  sectionTitle: { color: '#1F2328', fontSize: 17, fontWeight: '900', marginBottom: 12 },
   rowCard: { flexDirection: 'row', alignItems: 'center', gap: 12, borderRadius: 14, backgroundColor: '#F9FAFB', padding: 12, marginBottom: 8 },
   rowBody: { flex: 1, minWidth: 0 },
-  rowTitle: { color: '#111827', fontSize: 14, fontWeight: '800' },
+  rowTitle: { color: '#1F2328', fontSize: 14, fontWeight: '800' },
   rowMeta: { marginTop: 3, color: '#6B7280', fontSize: 12, fontWeight: '600' },
-  rowAmount: { color: '#111827', fontSize: 13, fontWeight: '900' },
+  rowAmount: { color: '#1F2328', fontSize: 13, fontWeight: '900' },
   debtAmount: { color: '#DC2626', fontSize: 13, fontWeight: '900' },
   emptyText: { color: '#6B7280', fontSize: 14, lineHeight: 20, fontWeight: '600' },
   activityRow: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 8 },
@@ -399,7 +399,7 @@ const styles = StyleSheet.create({
   actionButton: { minHeight: 46, flexGrow: 1, flexBasis: '31%', minWidth: 180, borderRadius: 14, borderWidth: 1, borderColor: '#C7ECE9', backgroundColor: '#F0FBFA', paddingHorizontal: 12, alignItems: 'center', justifyContent: 'center', flexDirection: 'row', gap: 8 },
   actionText: { color: '#0F8F89', fontSize: 13, fontWeight: '900' },
   stateCard: { minHeight: 170, borderRadius: 18, borderWidth: 1, borderColor: '#E5E7EB', backgroundColor: '#FFFFFF', padding: 18, alignItems: 'center', justifyContent: 'center', gap: 10 },
-  stateTitle: { color: '#111827', fontSize: 16, fontWeight: '900', textAlign: 'center' },
+  stateTitle: { color: '#1F2328', fontSize: 16, fontWeight: '900', textAlign: 'center' },
   stateText: { color: '#6B7280', fontSize: 14, lineHeight: 20, fontWeight: '600', textAlign: 'center' },
   errorText: { color: '#DC2626', fontSize: 14, lineHeight: 20, fontWeight: '700', textAlign: 'center' },
   retryButton: { borderRadius: 12, backgroundColor: '#D6F3F1', paddingHorizontal: 14, paddingVertical: 8 },

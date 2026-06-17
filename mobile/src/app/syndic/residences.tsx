@@ -85,7 +85,7 @@ export default function SyndicResidencesScreen() {
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <Pressable style={styles.backRow} onPress={() => router.replace('/syndic/dashboard')}>
-            <ChevronLeft size={18} color="#111827" />
+            <ChevronLeft size={18} color="#1F2328" />
             <Text style={styles.backText}>Retour</Text>
           </Pressable>
           <Text style={styles.title}>Résidences</Text>
@@ -173,12 +173,12 @@ const styles = StyleSheet.create({
   },
   backText: {
     marginLeft: 2,
-    color: '#111827',
+    color: '#1F2328',
     fontSize: 16,
     fontWeight: '500',
   },
   title: {
-    color: '#111827',
+    color: '#1F2328',
     fontSize: 28,
     lineHeight: 34,
     fontWeight: '800',
@@ -225,7 +225,7 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     marginTop: 14,
-    color: '#111827',
+    color: '#1F2328',
     fontSize: 17,
     fontWeight: '800',
   },
@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   stateTitle: {
-    color: '#111827',
+    color: '#1F2328',
     fontSize: 15,
     fontWeight: '800',
     textAlign: 'center',

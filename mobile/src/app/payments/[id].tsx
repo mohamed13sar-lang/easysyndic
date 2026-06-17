@@ -25,7 +25,6 @@ import {
   PaymentStatus,
   ResidentPayment,
 } from '@/services/payments-service';
-import { uploadPaymentProof } from '@/services/storage-service';
 
 const monthNames = [
   'Janvier',
@@ -102,6 +101,7 @@ export default function PaymentDetailsScreen() {
   const [declaredAmount, setDeclaredAmount] = useState('');
   const [declaredProof, setDeclaredProof] = useState<ImagePickerAsset | null>(null);
   const [declaredNote, setDeclaredNote] = useState('');
+  const [declaredDate, setDeclaredDate] = useState(new Date().toISOString().slice(0, 10));
   const [declaredMethod, setDeclaredMethod] = useState<PaymentMethod>('BANK_TRANSFER');
   const [error, setError] = useState('');
 
@@ -182,29 +182,25 @@ export default function PaymentDetailsScreen() {
       Alert.alert('Montant invalide', 'Saisissez un montant de versement positif.');
       return;
     }
-    if (!declaredProof) {
-      Alert.alert('Preuve de paiement', 'Ajoutez une image de votre preuve de paiement.');
-      return;
-    }
 
     setIsSubmitting(true);
     try {
-      const proof = await uploadPaymentProof({
-        uri: declaredProof.uri,
-        fileName: declaredProof.fileName,
-        mimeType: declaredProof.mimeType,
-        size: declaredProof.fileSize,
-      });
+      const noteParts = [`Date declaree: ${declaredDate}`];
+      if (declaredNote.trim()) {
+        noteParts.push(declaredNote.trim());
+      }
+
+      // TODO: include proofUrl when a backend-compatible upload endpoint is available.
       const updatedPayment = await declareMyPayment(token, payment.id, {
         amount,
         paymentMethod: declaredMethod,
-        proofUrl: proof.url,
-        note: declaredNote.trim() || undefined,
+        note: noteParts.join(' - '),
       });
       setPayment(updatedPayment);
       setDeclaredAmount('');
       setDeclaredProof(null);
       setDeclaredNote('');
+      setDeclaredDate(new Date().toISOString().slice(0, 10));
       setIsDeclareVisible(false);
       Alert.alert('Déclaration envoyée', 'Votre paiement est en attente de validation.');
     } catch (err: unknown) {
@@ -329,12 +325,25 @@ export default function PaymentDetailsScreen() {
               style={styles.input}
             />
             <TextInput
+              value={declaredDate}
+              onChangeText={setDeclaredDate}
+              placeholder="Date de paiement (YYYY-MM-DD)"
+              placeholderTextColor={colors.muted}
+              style={styles.input}
+            />
+            <TextInput
               value={declaredNote}
               onChangeText={setDeclaredNote}
               placeholder="Note optionnelle"
               placeholderTextColor={colors.muted}
               style={styles.input}
             />
+            <View style={styles.proofNotice}>
+              <Text style={styles.proofNoticeText}>
+                La preuve photo est optionnelle. Elle reste en apercu local tant que l upload backend
+                n est pas active.
+              </Text>
+            </View>
             <Pressable style={styles.proofButton} onPress={chooseProofImage}>
               <View style={styles.proofIcon}>
                 {declaredProof ? (
@@ -346,7 +355,7 @@ export default function PaymentDetailsScreen() {
               <View style={styles.proofCopy}>
                 <Text style={styles.proofTitle}>Preuve de paiement</Text>
                 <Text style={styles.proofSubtitle}>
-                  {declaredProof ? 'Image selectionnee' : 'Prendre une photo ou choisir depuis la galerie'}
+                  {declaredProof ? 'Image selectionnee (non envoyee)' : 'Prendre une photo ou choisir depuis la galerie'}
                 </Text>
               </View>
             </Pressable>
@@ -647,6 +656,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+  },
+  proofNotice: {
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: colors.warningLight,
+    backgroundColor: '#FFFBEB',
+    padding: 12,
+  },
+  proofNoticeText: {
+    color: '#92400E',
+    fontSize: 12,
+    lineHeight: 17,
+    fontWeight: '700',
   },
   proofIcon: {
     width: 38,

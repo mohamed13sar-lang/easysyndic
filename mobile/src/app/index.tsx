@@ -1,12 +1,14 @@
 import { router } from 'expo-router';
 import { Building2, CheckCircle2, CreditCard, Megaphone } from 'lucide-react-native';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppButton } from '@/components/AppButton';
 import { colors } from '@/constants/colors';
 import { radius, shadows, spacing, typography } from '@/constants/design';
 
 export default function HomeScreen() {
+  const { height } = useWindowDimensions();
+
   return (
     <View style={styles.screen}>
       <SafeAreaView style={styles.safeArea}>
@@ -17,7 +19,7 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.illustrationCard}>
+        <View style={[styles.illustrationCard, { height: Math.min(360, Math.max(260, height * 0.42)) }]}>
           <View style={styles.floatingCardLeft}>
             <CreditCard size={18} color={colors.primary} />
             <Text style={styles.floatLabel}>Paiements</Text>
@@ -91,7 +93,6 @@ const styles = StyleSheet.create({
   },
   illustrationCard: {
     marginTop: 12,
-    height: 360,
     borderRadius: radius.xxl,
     backgroundColor: colors.primaryLight,
     alignItems: 'center',

@@ -25,6 +25,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { Roles } from '../common/decorators/roles.decorator';
 import { RolesGuard } from '../common/guards/roles.guard';
+import { PermissionsGuard } from '../team/guards/permissions.guard';
 import { CreateResidenceDto } from './dto/create-residence.dto';
 import { UpdateResidenceStatusDto } from './dto/update-residence-status.dto';
 import { UpdateResidenceDto } from './dto/update-residence.dto';
@@ -39,8 +40,16 @@ type AuthenticatedUser = {
 
 @ApiTags('Residences')
 @ApiBearerAuth('JWT-auth')
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC)
+@UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
+@Roles(
+  UserRole.SUPER_ADMIN,
+  UserRole.SYNDIC,
+  UserRole.VICE_SYNDIC,
+  UserRole.CAISSIER,
+  UserRole.CASHIER,
+  UserRole.GARDIEN,
+  UserRole.SECRETAIRE,
+)
 @Controller()
 export class ResidencesController {
   constructor(private readonly residencesService: ResidencesService) {}

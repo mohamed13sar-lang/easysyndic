@@ -41,6 +41,10 @@ export class AuthService {
       const passwordLoginRoles: UserRole[] = [
         UserRole.SUPER_ADMIN,
         UserRole.SYNDIC,
+        UserRole.VICE_SYNDIC,
+        UserRole.CAISSIER,
+        UserRole.GARDIEN,
+        UserRole.SECRETAIRE,
         UserRole.CASHIER,
       ];
 

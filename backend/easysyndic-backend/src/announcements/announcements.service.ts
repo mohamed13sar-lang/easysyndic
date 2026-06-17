@@ -12,7 +12,11 @@ import { CreateAnnouncementDto } from './dto/create-announcement.dto';
 import { UpdateAnnouncementStatusDto } from './dto/update-announcement-status.dto';
 import { UpdateAnnouncementDto } from './dto/update-announcement.dto';
 
-type AuthUser = { id: string; role: UserRole };
+type AuthUser = {
+  id: string;
+  role: UserRole;
+  permissionChecked?: { residenceId: string };
+};
 
 @Injectable()
 export class AnnouncementsService {
@@ -224,6 +228,14 @@ export class AnnouncementsService {
     if (
       currentUser.role === UserRole.SYNDIC &&
       residence.syndicId !== currentUser.id
+    ) {
+      throw new ForbiddenException('Accès non autorisé à cette résidence');
+    }
+
+    if (
+      currentUser.role !== UserRole.SUPER_ADMIN &&
+      currentUser.role !== UserRole.SYNDIC &&
+      currentUser.permissionChecked?.residenceId !== residenceId
     ) {
       throw new ForbiddenException('Accès non autorisé à cette résidence');
     }
