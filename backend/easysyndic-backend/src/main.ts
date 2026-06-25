@@ -23,7 +23,7 @@ async function bootstrap() {
       /^https?:\/\/localhost(:\d+)?$/.test(origin) ||
       /^https?:\/\/127\.0\.0\.1(:\d+)?$/.test(origin) ||
       /^https?:\/\/192\.168\.\d+\.\d+(:\d+)?$/.test(origin) ||
-      /^https:\/\/easysyndic(-[a-z0-9]+)?\.vercel\.app$/.test(origin)
+      /^https:\/\/easysyndic(?:-[a-z0-9-]+)?\.vercel\.app$/.test(origin)
     );
   };
 
