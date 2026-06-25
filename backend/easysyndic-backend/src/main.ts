@@ -8,15 +8,22 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  const allowedDevOrigin = (origin?: string) => {
+  const configuredOrigins = (process.env.CORS_ORIGINS ?? '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean);
+
+  const allowedOrigin = (origin?: string) => {
     if (!origin) {
       return true;
     }
 
     return (
+      configuredOrigins.includes(origin) ||
       /^https?:\/\/localhost(:\d+)?$/.test(origin) ||
       /^https?:\/\/127\.0\.0\.1(:\d+)?$/.test(origin) ||
-      /^https?:\/\/192\.168\.\d+\.\d+(:\d+)?$/.test(origin)
+      /^https?:\/\/192\.168\.\d+\.\d+(:\d+)?$/.test(origin) ||
+      /^https:\/\/easysyndic(-[a-z0-9]+)?\.vercel\.app$/.test(origin)
     );
   };
 
@@ -25,7 +32,7 @@ async function bootstrap() {
       origin: string | undefined,
       callback: (err: Error | null, allow?: boolean) => void,
     ) => {
-      if (allowedDevOrigin(origin)) {
+      if (allowedOrigin(origin)) {
         callback(null, true);
         return;
       }
