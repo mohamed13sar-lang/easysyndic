@@ -4,6 +4,7 @@ import { CashierModule } from './cashier/cashier.module';
 import { ComplaintsModule } from './complaints/complaints.module';
 import { ConfigModule } from '@nestjs/config';
 import { ApartmentsModule } from './apartments/apartments.module';
+import { AssembliesModule } from './assemblies/assemblies.module';
 import { AuthModule } from './auth/auth.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { DocumentsModule } from './documents/documents.module';
@@ -36,6 +37,7 @@ import { UsersModule } from './users/users.module';
     OtpModule,
     ResidencesModule,
     ApartmentsModule,
+    AssembliesModule,
     ResidentsModule,
     MeModule,
     PaymentsModule,

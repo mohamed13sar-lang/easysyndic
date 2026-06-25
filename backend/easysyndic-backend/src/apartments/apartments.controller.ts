@@ -120,7 +120,9 @@ export class ApartmentsController {
   @ApiOperation({ summary: 'Get apartment profile for syndic residence' })
   @ApiParam({ name: 'residenceId', format: 'uuid' })
   @ApiParam({ name: 'apartmentId', format: 'uuid' })
-  @ApiOkResponse({ description: 'Apartment profile with residents, payments and complaints' })
+  @ApiOkResponse({
+    description: 'Apartment profile with residents, payments and complaints',
+  })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiForbiddenResponse({ description: 'Forbidden' })
   @ApiNotFoundResponse({ description: 'Apartment not found in residence' })
@@ -161,7 +163,9 @@ export class ApartmentsController {
 
   @Patch('syndic/residences/:residenceId/apartments/:apartmentId/status')
   @RequirePermission('apartments', 'edit')
-  @ApiOperation({ summary: 'Update apartment active status for syndic residence' })
+  @ApiOperation({
+    summary: 'Update apartment active status for syndic residence',
+  })
   @ApiParam({ name: 'residenceId', format: 'uuid' })
   @ApiParam({ name: 'apartmentId', format: 'uuid' })
   @ApiOkResponse({ type: ApartmentResponseEntity })

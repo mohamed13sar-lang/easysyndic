@@ -12,6 +12,31 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserStatusDto } from './dto/update-user-status.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
+function normalizeError(error: unknown) {
+  if (error instanceof Error) {
+    return {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+    };
+  }
+
+  if (typeof error === 'object' && error !== null) {
+    const record = error as Record<string, unknown>;
+    return {
+      name: typeof record.name === 'string' ? record.name : undefined,
+      message: typeof record.message === 'string' ? record.message : undefined,
+      code: typeof record.code === 'string' ? record.code : undefined,
+      meta: record.meta,
+      stack: typeof record.stack === 'string' ? record.stack : undefined,
+    };
+  }
+
+  return {
+    message: String(error),
+  };
+}
+
 @Injectable()
 export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
@@ -31,12 +56,12 @@ export class UsersService {
           select: { id: true },
         });
       } catch (error: unknown) {
-        const err = error as any;
+        const err = normalizeError(error);
         console.error(
           '[USERS] phone check failed',
-          err?.name,
-          err?.message,
-          err?.stack,
+          err.name,
+          err.message,
+          err.stack,
         );
         throw error;
       }
@@ -54,12 +79,12 @@ export class UsersService {
             select: { id: true },
           });
         } catch (error: unknown) {
-          const err = error as any;
+          const err = normalizeError(error);
           console.error(
             '[USERS] email check failed',
-            err?.name,
-            err?.message,
-            err?.stack,
+            err.name,
+            err.message,
+            err.stack,
           );
           throw error;
         }
@@ -75,21 +100,20 @@ export class UsersService {
         try {
           hashedPassword = await bcrypt.hash(createUserDto.password, 10);
         } catch (error: unknown) {
-          const err = error as any;
+          const err = normalizeError(error);
           console.error(
             '[USERS] bcrypt hash failed',
-            err?.name,
-            err?.message,
-            err?.stack,
+            err.name,
+            err.message,
+            err.stack,
           );
           throw error;
         }
       }
 
       console.log('[USERS] creating user in database');
-      let createdUser: any;
       try {
-        createdUser = await this.prisma.user.create({
+        const createdUser = await this.prisma.user.create({
           data: {
             fullName: createUserDto.fullName,
             phone: createUserDto.phone,
@@ -99,22 +123,20 @@ export class UsersService {
             isActive: true,
           },
         });
+        console.log('[USERS] user created successfully');
+        return this.sanitizeUser(createdUser);
       } catch (error: unknown) {
-        const err = error as any;
+        const err = normalizeError(error);
         console.error(
           '[USERS] prisma create failed',
-          err?.name,
-          err?.message,
-          err?.code,
-          err?.meta,
-          err?.stack,
+          err.name,
+          err.message,
+          err.code,
+          err.meta,
+          err.stack,
         );
         throw error;
       }
-
-      console.log('[USERS] user created successfully');
-
-      return this.sanitizeUser(createdUser);
     } catch (error: unknown) {
       if (error instanceof HttpException) {
         throw error;
@@ -137,14 +159,14 @@ export class UsersService {
         throw new ConflictException('Unique constraint violation');
       }
 
-      const err = error as any;
+      const err = normalizeError(error);
       console.error(
         '[USERS] unexpected create error',
-        err?.name,
-        err?.message,
-        err?.code,
-        err?.meta,
-        err?.stack,
+        err.name,
+        err.message,
+        err.code,
+        err.meta,
+        err.stack,
       );
       throw new InternalServerErrorException('Failed to create user');
     }
@@ -278,8 +300,15 @@ export class UsersService {
   private sanitizeUser<T extends { password: string | null }>(
     user: T,
   ): Omit<T, 'password'> {
-    // Remove password from API responses at the service boundary.
-    const { password: _password, ...safeUser } = user;
-    return safeUser;
+    return this.omitProperty(user, 'password');
+  }
+
+  private omitProperty<T extends object, K extends keyof T>(
+    object: T,
+    key: K,
+  ): Omit<T, K> {
+    const clone = { ...object };
+    delete clone[key];
+    return clone;
   }
 }

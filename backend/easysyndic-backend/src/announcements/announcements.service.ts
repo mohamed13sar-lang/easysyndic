@@ -5,7 +5,11 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { AnnouncementPriority, AnnouncementType, UserRole } from '@prisma/client';
+import {
+  AnnouncementPriority,
+  AnnouncementType,
+  UserRole,
+} from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { CreateAnnouncementDto } from './dto/create-announcement.dto';
@@ -36,7 +40,11 @@ export class AnnouncementsService {
         isActive: true,
         ...this.notExpiredFilter(),
       },
-      orderBy: [{ priority: 'desc' }, { publishAt: 'desc' }, { createdAt: 'desc' }],
+      orderBy: [
+        { priority: 'desc' },
+        { publishAt: 'desc' },
+        { createdAt: 'desc' },
+      ],
       include: this.defaultIncludes(),
     });
 
@@ -86,7 +94,9 @@ export class AnnouncementsService {
     await this.ensureSyndicResidenceAccess(residenceId, currentUser);
     await this.getAnnouncementInResidenceOrThrow(residenceId, announcementId);
     const publishAt =
-      dto.publishAt === undefined ? undefined : this.parsePublishAt(dto.publishAt);
+      dto.publishAt === undefined
+        ? undefined
+        : this.parsePublishAt(dto.publishAt);
     const expiresAt =
       dto.expiresAt === undefined
         ? undefined
@@ -153,7 +163,10 @@ export class AnnouncementsService {
     }
 
     await this.ensureResidentResidenceAccess(currentUser.id, residenceId);
-    const take = limit === undefined ? undefined : Math.max(1, Math.min(Number(limit), 20));
+    const take =
+      limit === undefined
+        ? undefined
+        : Math.max(1, Math.min(Number(limit), 20));
 
     const announcements = await this.prisma.announcement.findMany({
       where: {
@@ -222,7 +235,9 @@ export class AnnouncementsService {
     });
 
     if (!residence) {
-      throw new NotFoundException(`Residence with id "${residenceId}" not found`);
+      throw new NotFoundException(
+        `Residence with id "${residenceId}" not found`,
+      );
     }
 
     if (

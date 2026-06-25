@@ -128,12 +128,19 @@ export class DashboardService {
     currentUser: { id: string; role: UserRole },
     residenceIds: string[],
   ) {
-    if (currentUser.role === UserRole.SUPER_ADMIN || currentUser.role === UserRole.SYNDIC) {
+    if (
+      currentUser.role === UserRole.SUPER_ADMIN ||
+      currentUser.role === UserRole.SYNDIC
+    ) {
       return stats;
     }
 
     const memberships = await this.prisma.syndicTeamMember.findMany({
-      where: { userId: currentUser.id, residenceId: { in: residenceIds }, isActive: true },
+      where: {
+        userId: currentUser.id,
+        residenceId: { in: residenceIds },
+        isActive: true,
+      },
       select: { permissions: true },
     });
     const can = (action: string) =>
@@ -146,10 +153,18 @@ export class DashboardService {
       totalApartments: can('viewApartmentsKpi') ? stats.totalApartments : 0,
       totalResidents: can('viewResidentsKpi') ? stats.totalResidents : 0,
       unpaidPaymentsCount: can('viewUnpaidKpi') ? stats.unpaidPaymentsCount : 0,
-      unpaidPaymentsAmount: can('viewUnpaidKpi') ? stats.unpaidPaymentsAmount : 0,
-      openComplaintsCount: can('viewComplaintsKpi') ? stats.openComplaintsCount : 0,
-      resolvedComplaintsCount: can('viewComplaintsKpi') ? stats.resolvedComplaintsCount : 0,
-      notificationsSentCount: can('viewDashboard') ? stats.notificationsSentCount : 0,
+      unpaidPaymentsAmount: can('viewUnpaidKpi')
+        ? stats.unpaidPaymentsAmount
+        : 0,
+      openComplaintsCount: can('viewComplaintsKpi')
+        ? stats.openComplaintsCount
+        : 0,
+      resolvedComplaintsCount: can('viewComplaintsKpi')
+        ? stats.resolvedComplaintsCount
+        : 0,
+      notificationsSentCount: can('viewDashboard')
+        ? stats.notificationsSentCount
+        : 0,
     };
   }
 
@@ -295,7 +310,11 @@ export class DashboardService {
 
     const normalizedPayments = paymentsRows.map((payment) => ({
       ...payment,
-      ...normalizePayment(payment.amountDue, payment.amountPaid, payment.status),
+      ...normalizePayment(
+        payment.amountDue,
+        payment.amountPaid,
+        payment.status,
+      ),
     }));
     const residentsInactive = residentsTotal - residentsActive;
     const providersInactive = providersTotal - providersActive;

@@ -3,6 +3,7 @@ import {
   Bell,
   Bot,
   Building2,
+  CalendarDays,
   ChevronRight,
   ClipboardList,
   CreditCard,
@@ -304,6 +305,12 @@ export default function SyndicDashboardScreen() {
       subtitle: 'Publier et consulter les fichiers',
       icon: FileText,
       onPress: () => router.push('/syndic/documents' as never),
+    },
+    {
+      title: 'Assemblées Générales',
+      subtitle: 'Créer AG, présence et votes',
+      icon: CalendarDays,
+      onPress: () => router.push('/syndic/assemblies' as never),
     },
       {
       title: 'Equipe Syndicat',

@@ -34,7 +34,9 @@ export class StorageService {
 
     const mimetype = file.mimetype ?? 'application/octet-stream';
     if (!options.allowedMimeTypes.has(mimetype)) {
-      throw new BadRequestException(`Type de fichier non autorise: ${mimetype}`);
+      throw new BadRequestException(
+        `Type de fichier non autorise: ${mimetype}`,
+      );
     }
 
     if ((file.size ?? file.buffer.length) > options.maxSize) {
@@ -96,7 +98,10 @@ export class StorageService {
       );
     }
 
-    const payload = (await response.json()) as { signedURL?: string; signedUrl?: string };
+    const payload = (await response.json()) as {
+      signedURL?: string;
+      signedUrl?: string;
+    };
     const signedPath = payload.signedURL ?? payload.signedUrl;
     if (!signedPath) {
       throw new ServiceUnavailableException('Lien signe Supabase invalide');

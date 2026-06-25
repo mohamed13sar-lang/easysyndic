@@ -26,10 +26,14 @@ export class MeController {
   constructor(private readonly meService: MeService) {}
 
   @Get('residences')
-  @ApiOperation({ summary: 'Get current resident profile, residences and apartments' })
+  @ApiOperation({
+    summary: 'Get current resident profile, residences and apartments',
+  })
   @ApiOkResponse({ type: MeResidencesResponseEntity })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @ApiForbiddenResponse({ description: 'Only residents can access this endpoint' })
+  @ApiForbiddenResponse({
+    description: 'Only residents can access this endpoint',
+  })
   findMyResidences(@CurrentUser() currentUser: AuthenticatedUser) {
     return this.meService.findMyResidences(currentUser);
   }

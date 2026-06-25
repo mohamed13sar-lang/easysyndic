@@ -57,6 +57,7 @@ const residentRoutes = [
   '/profile',
   '/notifications',
   '/announcements',
+  '/assemblies',
   '/complaints',
 ];
 
@@ -213,6 +214,8 @@ function AppStack() {
         <Stack.Screen name="notifications/[id]" />
         <Stack.Screen name="announcements" />
         <Stack.Screen name="announcements/[id]" />
+        <Stack.Screen name="assemblies/index" />
+        <Stack.Screen name="assemblies/[id]" />
         <Stack.Screen name="complaints/index" />
         <Stack.Screen name="complaints/new" />
         <Stack.Screen name="complaints/[id]" />
@@ -225,6 +228,9 @@ function AppStack() {
         <Stack.Screen name="syndic/complaints" />
         <Stack.Screen name="syndic/notifications" />
         <Stack.Screen name="syndic/announcements" />
+        <Stack.Screen name="syndic/assemblies/index" />
+        <Stack.Screen name="syndic/assemblies/new" />
+        <Stack.Screen name="syndic/assemblies/[id]" />
         <Stack.Screen name="syndic/documents" />
         <Stack.Screen name="syndic/assistant" />
         <Stack.Screen name="syndic/team" />

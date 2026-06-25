@@ -40,7 +40,13 @@ export class AnnouncementsController {
   constructor(private readonly announcementsService: AnnouncementsService) {}
 
   @Get('syndic/residences/:residenceId/announcements')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC, UserRole.VICE_SYNDIC, UserRole.GARDIEN, UserRole.SECRETAIRE)
+  @Roles(
+    UserRole.SUPER_ADMIN,
+    UserRole.SYNDIC,
+    UserRole.VICE_SYNDIC,
+    UserRole.GARDIEN,
+    UserRole.SECRETAIRE,
+  )
   @RequirePermission('announcements', 'view')
   @ApiOperation({ summary: 'List active announcements for syndic residence' })
   @ApiOkResponse({ type: AnnouncementResponseEntity, isArray: true })
@@ -52,7 +58,12 @@ export class AnnouncementsController {
   }
 
   @Post('syndic/residences/:residenceId/announcements')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC, UserRole.VICE_SYNDIC, UserRole.SECRETAIRE)
+  @Roles(
+    UserRole.SUPER_ADMIN,
+    UserRole.SYNDIC,
+    UserRole.VICE_SYNDIC,
+    UserRole.SECRETAIRE,
+  )
   @RequirePermission('announcements', 'create')
   @ApiOperation({ summary: 'Create announcement for syndic residence' })
   @ApiCreatedResponse({ type: AnnouncementResponseEntity })
@@ -65,7 +76,12 @@ export class AnnouncementsController {
   }
 
   @Patch('syndic/residences/:residenceId/announcements/:announcementId')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC, UserRole.VICE_SYNDIC, UserRole.SECRETAIRE)
+  @Roles(
+    UserRole.SUPER_ADMIN,
+    UserRole.SYNDIC,
+    UserRole.VICE_SYNDIC,
+    UserRole.SECRETAIRE,
+  )
   @RequirePermission('announcements', 'edit')
   @ApiOperation({ summary: 'Update announcement for syndic residence' })
   @ApiOkResponse({ type: AnnouncementResponseEntity })
@@ -84,7 +100,12 @@ export class AnnouncementsController {
   }
 
   @Patch('syndic/residences/:residenceId/announcements/:announcementId/status')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC, UserRole.VICE_SYNDIC, UserRole.SECRETAIRE)
+  @Roles(
+    UserRole.SUPER_ADMIN,
+    UserRole.SYNDIC,
+    UserRole.VICE_SYNDIC,
+    UserRole.SECRETAIRE,
+  )
   @RequirePermission('announcements', 'edit')
   @ApiOperation({ summary: 'Update announcement active status' })
   @ApiOkResponse({ type: AnnouncementResponseEntity })
@@ -103,7 +124,12 @@ export class AnnouncementsController {
   }
 
   @Delete('syndic/residences/:residenceId/announcements/:announcementId')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC, UserRole.VICE_SYNDIC, UserRole.SECRETAIRE)
+  @Roles(
+    UserRole.SUPER_ADMIN,
+    UserRole.SYNDIC,
+    UserRole.VICE_SYNDIC,
+    UserRole.SECRETAIRE,
+  )
   @RequirePermission('announcements', 'delete')
   @ApiOperation({ summary: 'Soft delete announcement for syndic residence' })
   @ApiOkResponse({ type: AnnouncementResponseEntity })

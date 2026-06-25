@@ -43,7 +43,8 @@ export class TeamService {
 
     if (
       currentUser.role === UserRole.SUPER_ADMIN ||
-      (currentUser.role === UserRole.SYNDIC && residence.syndicId === currentUser.id)
+      (currentUser.role === UserRole.SYNDIC &&
+        residence.syndicId === currentUser.id)
     ) {
       return this.getFullPermissions();
     }

@@ -1,4 +1,8 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { UserRole } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import {
@@ -64,7 +68,12 @@ export class TeamPermissionsService {
       throw new ForbiddenException('Residence context is required');
     }
 
-    const allowed = await this.hasPermission(user.id, residenceId, module, action);
+    const allowed = await this.hasPermission(
+      user.id,
+      residenceId,
+      module,
+      action,
+    );
     if (!allowed) {
       throw new ForbiddenException('Permission insuffisante');
     }

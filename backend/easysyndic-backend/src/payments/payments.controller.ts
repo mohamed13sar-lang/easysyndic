@@ -14,6 +14,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import type { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
 import { memoryStorage } from 'multer';
 import { UserRole } from '@prisma/client';
 import {
@@ -40,6 +41,7 @@ import { PaymentResponseEntity } from './entities/payment-response.entity';
 import { PaymentsService } from './payments.service';
 
 type AuthUser = { id: string; role: UserRole };
+const paymentProofUploadOptions: MulterOptions = { storage: memoryStorage() };
 
 @ApiTags('Payments')
 @ApiBearerAuth('JWT-auth')
@@ -56,7 +58,13 @@ export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) {}
 
   @Get('syndic/residences/:residenceId/payments/non-paid')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC, UserRole.VICE_SYNDIC, UserRole.CAISSIER, UserRole.CASHIER)
+  @Roles(
+    UserRole.SUPER_ADMIN,
+    UserRole.SYNDIC,
+    UserRole.VICE_SYNDIC,
+    UserRole.CAISSIER,
+    UserRole.CASHIER,
+  )
   @RequirePermission('payments', 'view')
   @ApiOperation({ summary: 'List non-paid payments by syndic residence' })
   @ApiParam({ name: 'residenceId', format: 'uuid' })
@@ -72,7 +80,13 @@ export class PaymentsController {
   }
 
   @Get('syndic/payments/declarations')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC, UserRole.VICE_SYNDIC, UserRole.CAISSIER, UserRole.CASHIER)
+  @Roles(
+    UserRole.SUPER_ADMIN,
+    UserRole.SYNDIC,
+    UserRole.VICE_SYNDIC,
+    UserRole.CAISSIER,
+    UserRole.CASHIER,
+  )
   @RequirePermission('payments', 'view')
   @ApiOperation({ summary: 'List pending resident payment declarations' })
   @ApiOkResponse({ isArray: true })
@@ -80,11 +94,20 @@ export class PaymentsController {
     @Query('residenceId', new ParseUUIDPipe()) residenceId: string,
     @CurrentUser() currentUser: AuthUser,
   ) {
-    return this.paymentsService.findPendingDeclarations(residenceId, currentUser);
+    return this.paymentsService.findPendingDeclarations(
+      residenceId,
+      currentUser,
+    );
   }
 
   @Get('syndic/residences/:residenceId/payments')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC, UserRole.VICE_SYNDIC, UserRole.CAISSIER, UserRole.CASHIER)
+  @Roles(
+    UserRole.SUPER_ADMIN,
+    UserRole.SYNDIC,
+    UserRole.VICE_SYNDIC,
+    UserRole.CAISSIER,
+    UserRole.CASHIER,
+  )
   @RequirePermission('payments', 'view')
   @ApiOperation({ summary: 'List payments by syndic residence' })
   @ApiParam({ name: 'residenceId', format: 'uuid' })
@@ -97,7 +120,13 @@ export class PaymentsController {
   }
 
   @Post('syndic/residences/:residenceId/payments')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC, UserRole.VICE_SYNDIC, UserRole.CAISSIER, UserRole.CASHIER)
+  @Roles(
+    UserRole.SUPER_ADMIN,
+    UserRole.SYNDIC,
+    UserRole.VICE_SYNDIC,
+    UserRole.CAISSIER,
+    UserRole.CASHIER,
+  )
   @RequirePermission('payments', 'create')
   @ApiOperation({ summary: 'Create payment in syndic residence' })
   @ApiParam({ name: 'residenceId', format: 'uuid' })
@@ -111,7 +140,13 @@ export class PaymentsController {
   }
 
   @Patch('syndic/residences/:residenceId/payments/:paymentId')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC, UserRole.VICE_SYNDIC, UserRole.CAISSIER, UserRole.CASHIER)
+  @Roles(
+    UserRole.SUPER_ADMIN,
+    UserRole.SYNDIC,
+    UserRole.VICE_SYNDIC,
+    UserRole.CAISSIER,
+    UserRole.CASHIER,
+  )
   @RequirePermission('payments', 'edit')
   @ApiOperation({ summary: 'Update payment in syndic residence' })
   @ApiParam({ name: 'residenceId', format: 'uuid' })
@@ -132,7 +167,13 @@ export class PaymentsController {
   }
 
   @Get('syndic/residences/:residenceId/payments/:paymentId/transactions')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC, UserRole.VICE_SYNDIC, UserRole.CAISSIER, UserRole.CASHIER)
+  @Roles(
+    UserRole.SUPER_ADMIN,
+    UserRole.SYNDIC,
+    UserRole.VICE_SYNDIC,
+    UserRole.CAISSIER,
+    UserRole.CASHIER,
+  )
   @RequirePermission('payments', 'view')
   @ApiOperation({ summary: 'List payment transactions in syndic residence' })
   @ApiParam({ name: 'residenceId', format: 'uuid' })
@@ -151,7 +192,13 @@ export class PaymentsController {
   }
 
   @Post('syndic/residences/:residenceId/payments/:paymentId/transactions')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC, UserRole.VICE_SYNDIC, UserRole.CAISSIER, UserRole.CASHIER)
+  @Roles(
+    UserRole.SUPER_ADMIN,
+    UserRole.SYNDIC,
+    UserRole.VICE_SYNDIC,
+    UserRole.CAISSIER,
+    UserRole.CASHIER,
+  )
   @RequirePermission('payments', 'create')
   @ApiOperation({ summary: 'Add payment transaction in syndic residence' })
   @ApiParam({ name: 'residenceId', format: 'uuid' })
@@ -174,7 +221,13 @@ export class PaymentsController {
   @Patch(
     'syndic/residences/:residenceId/payments/:paymentId/transactions/:transactionId/validate',
   )
-  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC, UserRole.VICE_SYNDIC, UserRole.CAISSIER, UserRole.CASHIER)
+  @Roles(
+    UserRole.SUPER_ADMIN,
+    UserRole.SYNDIC,
+    UserRole.VICE_SYNDIC,
+    UserRole.CAISSIER,
+    UserRole.CASHIER,
+  )
   @RequirePermission('payments', 'validate')
   @ApiOperation({ summary: 'Validate resident declared payment transaction' })
   @ApiParam({ name: 'residenceId', format: 'uuid' })
@@ -198,7 +251,13 @@ export class PaymentsController {
   @Patch(
     'syndic/residences/:residenceId/payments/:paymentId/transactions/:transactionId/reject',
   )
-  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC, UserRole.VICE_SYNDIC, UserRole.CAISSIER, UserRole.CASHIER)
+  @Roles(
+    UserRole.SUPER_ADMIN,
+    UserRole.SYNDIC,
+    UserRole.VICE_SYNDIC,
+    UserRole.CAISSIER,
+    UserRole.CASHIER,
+  )
   @RequirePermission('payments', 'refuse')
   @ApiOperation({ summary: 'Reject resident declared payment transaction' })
   @ApiParam({ name: 'residenceId', format: 'uuid' })
@@ -222,9 +281,17 @@ export class PaymentsController {
   @Delete(
     'syndic/residences/:residenceId/payments/:paymentId/transactions/:transactionId',
   )
-  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC, UserRole.VICE_SYNDIC, UserRole.CAISSIER, UserRole.CASHIER)
+  @Roles(
+    UserRole.SUPER_ADMIN,
+    UserRole.SYNDIC,
+    UserRole.VICE_SYNDIC,
+    UserRole.CAISSIER,
+    UserRole.CASHIER,
+  )
   @RequirePermission('payments', 'delete')
-  @ApiOperation({ summary: 'Soft delete payment transaction in syndic residence' })
+  @ApiOperation({
+    summary: 'Soft delete payment transaction in syndic residence',
+  })
   @ApiParam({ name: 'residenceId', format: 'uuid' })
   @ApiParam({ name: 'paymentId', format: 'uuid' })
   @ApiParam({ name: 'transactionId', format: 'uuid' })
@@ -297,7 +364,7 @@ export class PaymentsController {
 
   @Post('me/payments/:paymentId/declare-payment')
   @Roles(UserRole.RESIDENT)
-  @UseInterceptors(FileInterceptor('proof', { storage: memoryStorage() }))
+  @UseInterceptors(FileInterceptor('proof', paymentProofUploadOptions))
   @ApiOperation({ summary: 'Declare a payment for validation' })
   @ApiParam({ name: 'paymentId', format: 'uuid' })
   @ApiCreatedResponse({ type: MyPaymentResponseEntity })
@@ -305,12 +372,7 @@ export class PaymentsController {
     @Param('paymentId', new ParseUUIDPipe()) paymentId: string,
     @Body() dto: DeclarePaymentDto,
     @UploadedFile()
-    proofFile: {
-      originalname?: string;
-      mimetype?: string;
-      size?: number;
-      buffer?: Buffer;
-    },
+    proofFile: Express.Multer.File | undefined,
     @CurrentUser() currentUser: AuthUser,
   ) {
     return this.paymentsService.declarePayment(

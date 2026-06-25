@@ -1,5 +1,5 @@
 import { ComplaintMediaType } from '@prisma/client';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEnum, IsInt, IsOptional, IsString, Min } from 'class-validator';
 
 export class AddComplaintMediaDto {

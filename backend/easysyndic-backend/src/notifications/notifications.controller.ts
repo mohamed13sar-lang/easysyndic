@@ -40,7 +40,12 @@ export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 
   @Post('residences/:residenceId/notifications')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC, UserRole.VICE_SYNDIC, UserRole.SECRETAIRE)
+  @Roles(
+    UserRole.SUPER_ADMIN,
+    UserRole.SYNDIC,
+    UserRole.VICE_SYNDIC,
+    UserRole.SECRETAIRE,
+  )
   @RequirePermission('notifications', 'send')
   @ApiOperation({ summary: 'Create notification for a residence target scope' })
   @ApiCreatedResponse({ type: NotificationResponseEntity })
@@ -57,7 +62,12 @@ export class NotificationsController {
   }
 
   @Get('residences/:residenceId/notifications')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC, UserRole.VICE_SYNDIC, UserRole.SECRETAIRE)
+  @Roles(
+    UserRole.SUPER_ADMIN,
+    UserRole.SYNDIC,
+    UserRole.VICE_SYNDIC,
+    UserRole.SECRETAIRE,
+  )
   @RequirePermission('notifications', 'view')
   @ApiOperation({ summary: 'List notifications by residence' })
   @ApiOkResponse({ type: NotificationResponseEntity, isArray: true })
@@ -69,7 +79,13 @@ export class NotificationsController {
   }
 
   @Post('residences/:residenceId/notifications/non-paid')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC, UserRole.VICE_SYNDIC, UserRole.CAISSIER, UserRole.CASHIER)
+  @Roles(
+    UserRole.SUPER_ADMIN,
+    UserRole.SYNDIC,
+    UserRole.VICE_SYNDIC,
+    UserRole.CAISSIER,
+    UserRole.CASHIER,
+  )
   @RequirePermission('notifications', 'send')
   @ApiOperation({ summary: 'Send non-paid payment reminders' })
   @ApiCreatedResponse({ type: NotificationResponseEntity })

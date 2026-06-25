@@ -1,4 +1,8 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { UserRole } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import {
@@ -24,7 +28,11 @@ export class DocumentsService {
     private readonly storage: StorageService,
   ) {}
 
-  async createForSyndic(dto: CreateDocumentDto, file: UploadedFile, user: AuthUser) {
+  async createForSyndic(
+    dto: CreateDocumentDto,
+    file: UploadedFile,
+    user: AuthUser,
+  ) {
     const residence = await this.prisma.residence.findUnique({
       where: { id: dto.residenceId },
       select: { id: true, syndicId: true },
@@ -42,7 +50,11 @@ export class DocumentsService {
       ['residences', dto.residenceId, 'documents'],
       file.originalname,
     );
-    await this.storage.uploadPrivateFile(STORAGE_BUCKETS.documents, storagePath, file);
+    await this.storage.uploadPrivateFile(
+      STORAGE_BUCKETS.documents,
+      storagePath,
+      file,
+    );
 
     return this.prisma.document.create({
       data: {
@@ -72,7 +84,9 @@ export class DocumentsService {
       },
       select: { residenceId: true },
     });
-    const residenceIds = Array.from(new Set(assignments.map((item) => item.residenceId)));
+    const residenceIds = Array.from(
+      new Set(assignments.map((item) => item.residenceId)),
+    );
     if (residenceId && !residenceIds.includes(residenceId)) {
       throw new ForbiddenException('Resident non associe a cette residence');
     }
@@ -103,7 +117,11 @@ export class DocumentsService {
 
     if (user.role === UserRole.RESIDENT) {
       const link = await this.prisma.residentApartment.findFirst({
-        where: { userId: user.id, residenceId: document.residenceId, isActive: true },
+        where: {
+          userId: user.id,
+          residenceId: document.residenceId,
+          isActive: true,
+        },
         select: { id: true },
       });
       if (!link) throw new ForbiddenException('Acces document refuse');

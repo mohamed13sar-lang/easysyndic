@@ -104,7 +104,7 @@ export class ResidencesService {
     createResidenceDto: CreateResidenceDto,
     currentUser: AuthenticatedUser,
   ) {
-    const syndicId = await this.resolveSyndicIdForCreate(
+    const syndicId = this.resolveSyndicIdForCreate(
       createResidenceDto,
       currentUser,
     );
@@ -213,7 +213,7 @@ export class ResidencesService {
     });
   }
 
-  private async resolveSyndicIdForCreate(
+  private resolveSyndicIdForCreate(
     createResidenceDto: CreateResidenceDto,
     currentUser: AuthenticatedUser,
   ) {

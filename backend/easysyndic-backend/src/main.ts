@@ -1,5 +1,6 @@
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import type { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.interface';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
@@ -19,8 +20,11 @@ async function bootstrap() {
     );
   };
 
-  app.enableCors({
-    origin: (origin, callback) => {
+  const corsOptions: CorsOptions = {
+    origin: (
+      origin: string | undefined,
+      callback: (err: Error | null, allow?: boolean) => void,
+    ) => {
       if (allowedDevOrigin(origin)) {
         callback(null, true);
         return;
@@ -30,7 +34,9 @@ async function bootstrap() {
     },
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Accept', 'Authorization'],
-  });
+  };
+
+  app.enableCors(corsOptions);
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -65,9 +71,7 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
   const port =
-    Number(process.env.PORT) ||
-    configService.get<number>('app.port') ||
-    3000;
+    Number(process.env.PORT) || configService.get<number>('APP_PORT') || 3000;
   const nodeEnv = process.env.NODE_ENV ?? 'development';
 
   await app.listen(port, '0.0.0.0');

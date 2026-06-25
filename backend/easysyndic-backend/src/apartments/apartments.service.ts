@@ -4,7 +4,12 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { ComplaintStatus, PaymentStatus, Prisma, UserRole } from '@prisma/client';
+import {
+  ComplaintStatus,
+  PaymentStatus,
+  Prisma,
+  UserRole,
+} from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateApartmentDto } from './dto/create-apartment.dto';
 import { UpdateApartmentStatusDto } from './dto/update-apartment-status.dto';
@@ -70,7 +75,7 @@ export class ApartmentsService {
 
     this.assertResidenceAccess(currentUser, apartment.residence);
 
-    const { residence: _residence, ...safeApartment } = apartment;
+    const safeApartment = this.omitProperties(apartment, ['residence']);
     return safeApartment;
   }
 
@@ -96,7 +101,7 @@ export class ApartmentsService {
     }
 
     this.assertResidenceAccess(currentUser, apartment.residence);
-    const { residence: _residence, ...safeApartment } = apartment;
+    const safeApartment = this.omitProperties(apartment, ['residence']);
     return safeApartment;
   }
 
@@ -264,12 +269,16 @@ export class ApartmentsService {
         createdAt: link.updatedAt,
       })),
     ]
-      .sort((left, right) => right.createdAt.getTime() - left.createdAt.getTime())
+      .sort(
+        (left, right) => right.createdAt.getTime() - left.createdAt.getTime(),
+      )
       .slice(0, 8);
 
     const totalDue = payments.reduce(
       (sum, payment) =>
-        payment.status === PaymentStatus.EXONERE ? sum : sum + payment.amountDue,
+        payment.status === PaymentStatus.EXONERE
+          ? sum
+          : sum + payment.amountDue,
       0,
     );
     const totalPaid = payments.reduce(
@@ -281,13 +290,13 @@ export class ApartmentsService {
       0,
     );
 
-    const {
-      residence,
-      residentApartments,
-      payments: _payments,
-      complaints,
-      ...apartmentDetails
-    } = apartment;
+    const { residence, residentApartments, complaints } = apartment;
+    const apartmentDetails = this.omitProperties(apartment, [
+      'residence',
+      'residentApartments',
+      'payments',
+      'complaints',
+    ]);
 
     return {
       apartment: apartmentDetails,
@@ -416,7 +425,11 @@ export class ApartmentsService {
       apartmentId,
       currentUser,
     );
-    return this.updateStatus(apartmentId, updateApartmentStatusDto, currentUser);
+    return this.updateStatus(
+      apartmentId,
+      updateApartmentStatusDto,
+      currentUser,
+    );
   }
 
   private apartmentCountsInclude() {
@@ -484,7 +497,8 @@ export class ApartmentsService {
 
     if (
       currentUser.permissionChecked &&
-      (!residence.id || currentUser.permissionChecked.residenceId === residence.id)
+      (!residence.id ||
+        currentUser.permissionChecked.residenceId === residence.id)
     ) {
       return;
     }
@@ -547,11 +561,13 @@ export class ApartmentsService {
   }) {
     return (
       payment.remainingAmount > 0 &&
-      ([
-        PaymentStatus.NON_PAYE,
-        PaymentStatus.PARTIELLEMENT_PAYE,
-        PaymentStatus.EN_RETARD,
-      ] as PaymentStatus[]).includes(payment.status)
+      (
+        [
+          PaymentStatus.NON_PAYE,
+          PaymentStatus.PARTIELLEMENT_PAYE,
+          PaymentStatus.EN_RETARD,
+        ] as PaymentStatus[]
+      ).includes(payment.status)
     );
   }
 
@@ -578,5 +594,16 @@ export class ApartmentsService {
         'Apartment number already exists in this residence',
       );
     }
+  }
+
+  private omitProperties<T extends object, K extends keyof T>(
+    object: T,
+    keys: readonly K[],
+  ): Omit<T, K> {
+    const clone = { ...object };
+    for (const key of keys) {
+      delete clone[key];
+    }
+    return clone;
   }
 }

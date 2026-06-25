@@ -47,7 +47,9 @@ export function normalizePayment(
   const amountDue = toSafeNumber(rawAmountDue);
   const amountPaid = toSafeNumber(rawAmountPaid);
   const dueDate = toOptionalDate(rawDueDate);
-  const isOverdue = Boolean(dueDate && dueDate.getTime() < startOfToday().getTime());
+  const isOverdue = Boolean(
+    dueDate && dueDate.getTime() < startOfToday().getTime(),
+  );
   let remainingAmount = Math.max(amountDue - amountPaid, 0);
   let status: PaymentStatus;
 
@@ -80,7 +82,13 @@ function startOfToday() {
 
 function toOptionalDate(value: unknown) {
   if (!value) return null;
-  const parsed = value instanceof Date ? value : new Date(String(value));
+  const parsed =
+    value instanceof Date
+      ? value
+      : typeof value === 'string' || typeof value === 'number'
+        ? new Date(value)
+        : null;
+  if (!parsed) return null;
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
@@ -186,7 +194,9 @@ export class PaymentsService {
       where: { id: paymentId },
       include: {
         residence: { select: { id: true, name: true } },
-        apartment: { select: { id: true, number: true, block: true, floor: true } },
+        apartment: {
+          select: { id: true, number: true, block: true, floor: true },
+        },
       },
     });
 
@@ -310,13 +320,19 @@ export class PaymentsService {
       where: { id: dto.apartmentId },
     });
     if (!apartment || apartment.residenceId !== residenceId) {
-      throw new NotFoundException('Appartement introuvable dans cette résidence');
+      throw new NotFoundException(
+        'Appartement introuvable dans cette résidence',
+      );
     }
 
     const resident = await this.prisma.user.findUnique({
       where: { id: dto.residentId },
     });
-    if (!resident || resident.role !== UserRole.RESIDENT || !resident.isActive) {
+    if (
+      !resident ||
+      resident.role !== UserRole.RESIDENT ||
+      !resident.isActive
+    ) {
       throw new NotFoundException('Résident introuvable');
     }
 
@@ -365,12 +381,7 @@ export class PaymentsService {
 
     const initialPaid = this.toNumber(dto.amountPaid);
     const dueDate = this.getPaymentDueDate(dto.month, dto.year, dto.dueDate);
-    const normalized = normalizePayment(
-      dto.amountDue,
-      0,
-      dto.status,
-      dueDate,
-    );
+    const normalized = normalizePayment(dto.amountDue, 0, dto.status, dueDate);
     const payment = await this.prisma.payment.create({
       data: {
         residenceId,
@@ -416,7 +427,11 @@ export class PaymentsService {
     paymentId: string,
     currentUser: AuthUser,
   ) {
-    await this.getPaymentInResidenceOrThrow(residenceId, paymentId, currentUser);
+    await this.getPaymentInResidenceOrThrow(
+      residenceId,
+      paymentId,
+      currentUser,
+    );
 
     try {
       return await this.prisma.paymentTransaction.findMany({
@@ -425,10 +440,14 @@ export class PaymentsService {
       });
     } catch (error) {
       if (this.isMissingPaymentTransactionStorageError(error)) {
-        this.throwTransactionsUnavailable('findTransactionsInResidence', error, {
-          residenceId,
-          paymentId,
-        });
+        this.throwTransactionsUnavailable(
+          'findTransactionsInResidence',
+          error,
+          {
+            residenceId,
+            paymentId,
+          },
+        );
       }
 
       throw error;
@@ -502,7 +521,11 @@ export class PaymentsService {
     dto: CreatePaymentTransactionDto,
     currentUser: AuthUser,
   ) {
-    await this.getPaymentInResidenceOrThrow(residenceId, paymentId, currentUser);
+    await this.getPaymentInResidenceOrThrow(
+      residenceId,
+      paymentId,
+      currentUser,
+    );
 
     const amount = this.toNumber(dto.amount);
     if (amount <= 0) {
@@ -664,7 +687,11 @@ export class PaymentsService {
     transactionId: string,
     currentUser: AuthUser,
   ) {
-    await this.getPaymentInResidenceOrThrow(residenceId, paymentId, currentUser);
+    await this.getPaymentInResidenceOrThrow(
+      residenceId,
+      paymentId,
+      currentUser,
+    );
     await this.updateTransactionStatus(
       paymentId,
       transactionId,
@@ -687,7 +714,11 @@ export class PaymentsService {
     transactionId: string,
     currentUser: AuthUser,
   ) {
-    await this.getPaymentInResidenceOrThrow(residenceId, paymentId, currentUser);
+    await this.getPaymentInResidenceOrThrow(
+      residenceId,
+      paymentId,
+      currentUser,
+    );
     await this.updateTransactionStatus(
       paymentId,
       transactionId,
@@ -710,7 +741,11 @@ export class PaymentsService {
     transactionId: string,
     currentUser: AuthUser,
   ) {
-    await this.getPaymentInResidenceOrThrow(residenceId, paymentId, currentUser);
+    await this.getPaymentInResidenceOrThrow(
+      residenceId,
+      paymentId,
+      currentUser,
+    );
 
     try {
       const transaction = await this.prisma.paymentTransaction.findUnique({
@@ -906,7 +941,11 @@ export class PaymentsService {
         : {}),
     });
 
-    return this.filterPaymentResponse(response, payment.residenceId, currentUser);
+    return this.filterPaymentResponse(
+      response,
+      payment.residenceId,
+      currentUser,
+    );
   }
 
   async update(id: string, dto: UpdatePaymentDto, currentUser: AuthUser) {
@@ -922,7 +961,8 @@ export class PaymentsService {
 
     const transactionTotal =
       dto.amountPaid === undefined
-        ? (await this.sumActiveTransactions(id)) ?? this.toNumber(payment.amountPaid)
+        ? ((await this.sumActiveTransactions(id)) ??
+          this.toNumber(payment.amountPaid))
         : this.toNumber(dto.amountPaid);
     const dueDate =
       dto.dueDate === undefined
@@ -977,9 +1017,7 @@ export class PaymentsService {
     });
 
     if (!payment || payment.residenceId !== residenceId) {
-      throw new NotFoundException(
-        PAYMENT_NOT_FOUND,
-      );
+      throw new NotFoundException(PAYMENT_NOT_FOUND);
     }
 
     return this.update(paymentId, dto, currentUser);
@@ -1059,13 +1097,16 @@ export class PaymentsService {
     dueDate?: Date | null;
   }) {
     return (
-      this.getPaymentDueDate(payment.month, payment.year, payment.dueDate).getTime() <=
-      startOfToday().getTime()
+      this.getPaymentDueDate(
+        payment.month,
+        payment.year,
+        payment.dueDate,
+      ).getTime() <= startOfToday().getTime()
     );
   }
 
   private isValidatedTransaction(transaction: {
-    status?: PaymentTransactionStatus | string;
+    status?: PaymentTransactionStatus;
     isActive?: boolean;
   }) {
     return (
@@ -1139,7 +1180,10 @@ export class PaymentsService {
   }
 
   private async findTransactionsByPaymentIds(paymentIds: string[]) {
-    const transactionsByPaymentId = new Map<string, PaymentTransactionResponse[]>();
+    const transactionsByPaymentId = new Map<
+      string,
+      PaymentTransactionResponse[]
+    >();
 
     if (paymentIds.length === 0) {
       return transactionsByPaymentId;
@@ -1155,7 +1199,8 @@ export class PaymentsService {
       });
 
       for (const transaction of transactions) {
-        const current = transactionsByPaymentId.get(transaction.paymentId) ?? [];
+        const current =
+          transactionsByPaymentId.get(transaction.paymentId) ?? [];
         current.push(transaction);
         transactionsByPaymentId.set(transaction.paymentId, current);
       }
@@ -1238,7 +1283,8 @@ export class PaymentsService {
   ) {
     if (process.env.NODE_ENV === 'production') return;
 
-    const message = error instanceof Error ? error.stack || error.message : String(error);
+    const message =
+      error instanceof Error ? error.stack || error.message : String(error);
     this.logger.error(
       `[${scope}] ${message}${context ? ` ${JSON.stringify(context)}` : ''}`,
     );
@@ -1307,8 +1353,10 @@ export class PaymentsService {
         status: normalized.status,
         paymentMethod:
           latestValidatedTransaction?.paymentMethod ?? payment.paymentMethod,
-        receiptUrl: latestValidatedTransaction?.receiptUrl ?? payment.receiptUrl,
-        paidAt: normalized.amountPaid > 0 ? latestValidatedTransaction?.paidAt : null,
+        receiptUrl:
+          latestValidatedTransaction?.receiptUrl ?? payment.receiptUrl,
+        paidAt:
+          normalized.amountPaid > 0 ? latestValidatedTransaction?.paidAt : null,
       },
     });
 
@@ -1394,7 +1442,11 @@ export class PaymentsService {
     return {
       ...payment,
       ...normalized,
-      dueDate: this.getPaymentDueDate(payment.month, payment.year, payment.dueDate),
+      dueDate: this.getPaymentDueDate(
+        payment.month,
+        payment.year,
+        payment.dueDate,
+      ),
     };
   }
 
@@ -1416,7 +1468,12 @@ export class PaymentsService {
     createdAt: Date;
     updatedAt: Date;
     residence: { id: string; name: string };
-    apartment: { id: string; number: string; block: string | null; floor: number | null };
+    apartment: {
+      id: string;
+      number: string;
+      block: string | null;
+      floor: number | null;
+    };
     transactions?: PaymentTransactionResponse[];
   }) {
     const normalized = normalizePayment(
@@ -1439,7 +1496,11 @@ export class PaymentsService {
       paidAt: payment.paidAt,
       createdAt: payment.createdAt,
       updatedAt: payment.updatedAt,
-      dueDate: this.getPaymentDueDate(payment.month, payment.year, payment.dueDate),
+      dueDate: this.getPaymentDueDate(
+        payment.month,
+        payment.year,
+        payment.dueDate,
+      ),
       residence: payment.residence,
       apartment: payment.apartment,
       transactions: payment.transactions ?? [],
@@ -1478,7 +1539,11 @@ export class PaymentsService {
     return {
       ...payment,
       ...normalized,
-      dueDate: this.getPaymentDueDate(payment.month, payment.year, payment.dueDate),
+      dueDate: this.getPaymentDueDate(
+        payment.month,
+        payment.year,
+        payment.dueDate,
+      ),
       transactions: payment.transactions ?? [],
     };
   }
@@ -1588,11 +1653,13 @@ export class PaymentsService {
     return (
       this.isDueCountable(payment) &&
       payment.remainingAmount > 0 &&
-      ([
-        PaymentStatus.NON_PAYE,
-        PaymentStatus.PARTIELLEMENT_PAYE,
-        PaymentStatus.EN_RETARD,
-      ] as PaymentStatus[]).includes(payment.status)
+      (
+        [
+          PaymentStatus.NON_PAYE,
+          PaymentStatus.PARTIELLEMENT_PAYE,
+          PaymentStatus.EN_RETARD,
+        ] as PaymentStatus[]
+      ).includes(payment.status)
     );
   }
 }

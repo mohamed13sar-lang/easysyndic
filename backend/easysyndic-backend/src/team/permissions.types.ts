@@ -7,6 +7,7 @@ export type PermissionModule =
   | 'residents'
   | 'payments'
   | 'complaints'
+  | 'assemblies'
   | 'announcements'
   | 'notifications'
   | 'assistant'
@@ -85,6 +86,15 @@ export const GRANULAR_PERMISSION_TEMPLATE: PermissionMap = {
     closeComplaint: false,
     deleteComplaint: false,
   },
+  assemblies: {
+    view: false,
+    create: false,
+    edit: false,
+    publish: false,
+    delete: false,
+    attendance: false,
+    voteManage: false,
+  },
   announcements: {
     viewList: false,
     create: false,
@@ -160,6 +170,7 @@ export const PERMISSION_TEMPLATES: Record<string, PermissionMap> = {
     'complaints.viewImages',
     'complaints.listenAudio',
     'announcements.viewList',
+    'assemblies.view',
   ]),
   [UserRole.SECRETAIRE]: withEnabled([
     'dashboard.viewDashboard',
@@ -171,6 +182,12 @@ export const PERMISSION_TEMPLATES: Record<string, PermissionMap> = {
     'announcements.viewList',
     'announcements.create',
     'announcements.edit',
+    'assemblies.view',
+    'assemblies.create',
+    'assemblies.edit',
+    'assemblies.publish',
+    'assemblies.attendance',
+    'assemblies.voteManage',
     'notifications.viewList',
     'notifications.send',
     'assistant.access',
@@ -204,6 +221,13 @@ export const LEGACY_PERMISSION_ALIASES: Record<string, string[]> = {
   'announcements.create': ['announcements.create'],
   'announcements.edit': ['announcements.edit'],
   'announcements.delete': ['announcements.delete'],
+  'assemblies.view': ['assemblies.view'],
+  'assemblies.create': ['assemblies.create'],
+  'assemblies.edit': ['assemblies.edit'],
+  'assemblies.publish': ['assemblies.publish'],
+  'assemblies.delete': ['assemblies.delete'],
+  'assemblies.attendance': ['assemblies.attendance'],
+  'assemblies.voteManage': ['assemblies.voteManage'],
   'notifications.view': ['notifications.viewList'],
   'notifications.send': ['notifications.send'],
 };
@@ -233,7 +257,9 @@ export function mergePermissions(
   role: UserRole,
   permissions?: PermissionMap,
 ): PermissionMap {
-  const base = clonePermissions(PERMISSION_TEMPLATES[role] ?? GRANULAR_PERMISSION_TEMPLATE);
+  const base = clonePermissions(
+    PERMISSION_TEMPLATES[role] ?? GRANULAR_PERMISSION_TEMPLATE,
+  );
 
   for (const [module, actions] of Object.entries(permissions ?? {})) {
     base[module] = { ...(base[module] ?? {}), ...actions };

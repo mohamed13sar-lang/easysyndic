@@ -1,5 +1,11 @@
 import { DocumentType } from '@prisma/client';
-import { IsEnum, IsOptional, IsString, IsUUID, MinLength } from 'class-validator';
+import {
+  IsEnum,
+  IsOptional,
+  IsString,
+  IsUUID,
+  MinLength,
+} from 'class-validator';
 
 export class CreateDocumentDto {
   @IsUUID()

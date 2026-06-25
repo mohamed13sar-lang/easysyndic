@@ -498,22 +498,28 @@ export class ResidentsService {
   private sanitizeUser<T extends { password: string | null }>(
     user: T,
   ): Omit<T, 'password'> {
-    const { password: _password, ...safeUser } = user;
-    return safeUser;
+    return this.omitProperty(user, 'password');
   }
 
   private stripUserFromLink<T extends { user: unknown }>(
     link: T,
   ): Omit<T, 'user'> {
-    const { user: _user, ...safe } = link;
-    return safe;
+    return this.omitProperty(link, 'user');
   }
 
   private stripApartmentFromLink<T extends { apartment: unknown }>(
     link: T,
   ): Omit<T, 'apartment'> {
-    const { apartment: _apartment, ...safe } = link;
-    return safe;
+    return this.omitProperty(link, 'apartment');
+  }
+
+  private omitProperty<T extends object, K extends keyof T>(
+    object: T,
+    key: K,
+  ): Omit<T, K> {
+    const clone = { ...object };
+    delete clone[key];
+    return clone;
   }
 
   private buildResidentResponse(

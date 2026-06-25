@@ -565,9 +565,7 @@ export class ComplaintsService {
       );
       return;
     }
-    if (
-      currentUser.permissionChecked?.residenceId === complaint.residence.id
-    ) {
+    if (currentUser.permissionChecked?.residenceId === complaint.residence.id) {
       return;
     }
     if (

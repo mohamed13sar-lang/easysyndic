@@ -14,6 +14,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import type { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
 import { memoryStorage } from 'multer';
 import { UserRole } from '@prisma/client';
 import {
@@ -41,6 +42,7 @@ import { ComplaintMediaResponseEntity } from './entities/complaint-media-respons
 import { ComplaintResponseEntity } from './entities/complaint-response.entity';
 
 type AuthUser = { id: string; role: UserRole };
+const complaintUploadOptions: MulterOptions = { storage: memoryStorage() };
 
 @ApiTags('Complaints')
 @ApiBearerAuth('JWT-auth')
@@ -50,7 +52,13 @@ export class ComplaintsController {
   constructor(private readonly complaintsService: ComplaintsService) {}
 
   @Get('syndic/residences/:residenceId/complaints')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC, UserRole.VICE_SYNDIC, UserRole.GARDIEN, UserRole.SECRETAIRE)
+  @Roles(
+    UserRole.SUPER_ADMIN,
+    UserRole.SYNDIC,
+    UserRole.VICE_SYNDIC,
+    UserRole.GARDIEN,
+    UserRole.SECRETAIRE,
+  )
   @RequirePermission('complaints', 'view')
   @ApiOperation({ summary: 'List complaints by syndic residence' })
   @ApiOkResponse({ type: ComplaintResponseEntity, isArray: true })
@@ -62,7 +70,13 @@ export class ComplaintsController {
   }
 
   @Get('syndic/residences/:residenceId/complaints/:complaintId')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC, UserRole.VICE_SYNDIC, UserRole.GARDIEN, UserRole.SECRETAIRE)
+  @Roles(
+    UserRole.SUPER_ADMIN,
+    UserRole.SYNDIC,
+    UserRole.VICE_SYNDIC,
+    UserRole.GARDIEN,
+    UserRole.SECRETAIRE,
+  )
   @RequirePermission('complaints', 'view')
   @ApiOperation({ summary: 'Get complaint by id in syndic residence' })
   @ApiOkResponse({ type: ComplaintResponseEntity })
@@ -79,7 +93,13 @@ export class ComplaintsController {
   }
 
   @Patch('syndic/residences/:residenceId/complaints/:complaintId/status')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC, UserRole.VICE_SYNDIC, UserRole.GARDIEN, UserRole.SECRETAIRE)
+  @Roles(
+    UserRole.SUPER_ADMIN,
+    UserRole.SYNDIC,
+    UserRole.VICE_SYNDIC,
+    UserRole.GARDIEN,
+    UserRole.SECRETAIRE,
+  )
   @RequirePermission('complaints', 'updateStatus')
   @ApiOperation({ summary: 'Update complaint status in syndic residence' })
   @ApiOkResponse({ type: ComplaintResponseEntity })
@@ -98,7 +118,13 @@ export class ComplaintsController {
   }
 
   @Post('syndic/residences/:residenceId/complaints/:complaintId/comments')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC, UserRole.VICE_SYNDIC, UserRole.GARDIEN, UserRole.SECRETAIRE)
+  @Roles(
+    UserRole.SUPER_ADMIN,
+    UserRole.SYNDIC,
+    UserRole.VICE_SYNDIC,
+    UserRole.GARDIEN,
+    UserRole.SECRETAIRE,
+  )
   @RequirePermission('complaints', 'updateStatus')
   @ApiOperation({ summary: 'Add comment to complaint in syndic residence' })
   @ApiCreatedResponse({ type: ComplaintCommentResponseEntity })
@@ -117,7 +143,13 @@ export class ComplaintsController {
   }
 
   @Get('syndic/residences/:residenceId/complaints/:complaintId/media')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC, UserRole.VICE_SYNDIC, UserRole.GARDIEN, UserRole.SECRETAIRE)
+  @Roles(
+    UserRole.SUPER_ADMIN,
+    UserRole.SYNDIC,
+    UserRole.VICE_SYNDIC,
+    UserRole.GARDIEN,
+    UserRole.SECRETAIRE,
+  )
   @RequirePermission('complaints', 'view')
   @ApiOperation({ summary: 'List complaint media in syndic residence' })
   @ApiOkResponse({ type: ComplaintMediaResponseEntity, isArray: true })
@@ -134,7 +166,13 @@ export class ComplaintsController {
   }
 
   @Post('syndic/residences/:residenceId/complaints/:complaintId/media')
-  @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC, UserRole.VICE_SYNDIC, UserRole.GARDIEN, UserRole.SECRETAIRE)
+  @Roles(
+    UserRole.SUPER_ADMIN,
+    UserRole.SYNDIC,
+    UserRole.VICE_SYNDIC,
+    UserRole.GARDIEN,
+    UserRole.SECRETAIRE,
+  )
   @RequirePermission('complaints', 'updateStatus')
   @ApiOperation({ summary: 'Add media to complaint in syndic residence' })
   @ApiCreatedResponse({ type: ComplaintMediaResponseEntity })
@@ -169,17 +207,13 @@ export class ComplaintsController {
 
   @Post('me/complaints')
   @Roles(UserRole.RESIDENT)
-  @UseInterceptors(FilesInterceptor('files', 5, { storage: memoryStorage() }))
+  @UseInterceptors(FilesInterceptor('files', 5, complaintUploadOptions))
   @ApiOperation({ summary: 'Create complaint for current resident apartment' })
   @ApiCreatedResponse({ type: ComplaintResponseEntity })
   createMyComplaint(
     @Body() dto: CreateMyComplaintDto,
-    @UploadedFiles() files: Array<{
-      originalname?: string;
-      mimetype?: string;
-      size?: number;
-      buffer?: Buffer;
-    }> = [],
+    @UploadedFiles()
+    files: Express.Multer.File[] = [],
     @CurrentUser() currentUser: AuthUser,
   ) {
     return this.complaintsService.createMyComplaintWithFiles(

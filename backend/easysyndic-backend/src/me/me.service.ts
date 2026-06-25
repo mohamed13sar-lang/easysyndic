@@ -26,7 +26,11 @@ export class MeService {
         role: true,
         isActive: true,
         residentApartments: {
-          orderBy: [{ isActive: 'desc' }, { isPrimary: 'desc' }, { createdAt: 'desc' }],
+          orderBy: [
+            { isActive: 'desc' },
+            { isPrimary: 'desc' },
+            { createdAt: 'desc' },
+          ],
           include: {
             apartment: {
               select: {
@@ -74,15 +78,26 @@ export class MeService {
     const activeRelation =
       residences.find(
         (residence) =>
-          residence.relationIsActive && residence.isActive && residence.apartment.isActive,
+          residence.relationIsActive &&
+          residence.isActive &&
+          residence.apartment.isActive,
       ) ?? null;
 
-    const { residentApartments: _residentApartments, ...profile } = user;
+    const profile = this.omitProperty(user, 'residentApartments');
 
     return {
       user: profile,
       residences,
       activeRelation,
     };
+  }
+
+  private omitProperty<T extends object, K extends keyof T>(
+    object: T,
+    key: K,
+  ): Omit<T, K> {
+    const clone = { ...object };
+    delete clone[key];
+    return clone;
   }
 }

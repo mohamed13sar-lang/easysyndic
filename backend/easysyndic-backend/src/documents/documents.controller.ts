@@ -11,6 +11,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import type { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
 import { memoryStorage } from 'multer';
 import { UserRole } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -21,6 +22,7 @@ import { CreateDocumentDto } from './dto/create-document.dto';
 import { DocumentsService } from './documents.service';
 
 type AuthUser = { id: string; role: UserRole };
+const documentUploadOptions: MulterOptions = { storage: memoryStorage() };
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller()
@@ -38,16 +40,11 @@ export class DocumentsController {
 
   @Post('syndic/documents')
   @Roles(UserRole.SUPER_ADMIN, UserRole.SYNDIC)
-  @UseInterceptors(FileInterceptor('file', { storage: memoryStorage() }))
+  @UseInterceptors(FileInterceptor('file', documentUploadOptions))
   create(
     @Body() dto: CreateDocumentDto,
     @UploadedFile()
-    file: {
-      originalname?: string;
-      mimetype?: string;
-      size?: number;
-      buffer?: Buffer;
-    },
+    file: Express.Multer.File,
     @CurrentUser() user: AuthUser,
   ) {
     return this.documentsService.createForSyndic(dto, file, user);
@@ -55,7 +52,10 @@ export class DocumentsController {
 
   @Get('me/documents')
   @Roles(UserRole.RESIDENT)
-  findMine(@CurrentUser() user: AuthUser, @Query('residenceId') residenceId?: string) {
+  findMine(
+    @CurrentUser() user: AuthUser,
+    @Query('residenceId') residenceId?: string,
+  ) {
     return this.documentsService.findMine(user, residenceId);
   }
 

@@ -1,6 +1,7 @@
 import { router, useFocusEffect } from 'expo-router';
 import {
   Bell,
+  CalendarDays,
   CreditCard,
   Droplets,
   FileText,
@@ -447,6 +448,13 @@ export default function HomeScreen() {
             iconBg="#F3F4F6"
             iconColor="#6B7280"
             onPress={() => router.push('/announcements' as never)}
+          />
+          <QuickAction
+            title="Assemblées"
+            icon={CalendarDays}
+            iconBg={colors.successLight}
+            iconColor={colors.success}
+            onPress={() => router.push('/assemblies' as never)}
           />
         </View>
 

@@ -170,6 +170,38 @@ enum DocumentType {
   GENERAL
 }
 
+enum AssemblyType {
+  ORDINAIRE
+  EXTRAORDINAIRE
+}
+
+enum AssemblyStatus {
+  DRAFT
+  PUBLISHED
+  IN_PROGRESS
+  CLOSED
+  CANCELLED
+}
+
+enum ParticipantStatus {
+  INVITED
+  PRESENT
+  ABSENT
+  REPRESENTED
+}
+
+enum ResolutionVotingStatus {
+  NOT_STARTED
+  OPEN
+  CLOSED
+}
+
+enum AssemblyVoteValue {
+  YES
+  NO
+  ABSTAIN
+}
+
 model User {
   id                           String                  @id @default(uuid())
   fullName                     String
@@ -198,6 +230,9 @@ model User {
   announcementsCreated         Announcement[]          @relation("AnnouncementsCreatedBy")
   documentsUploaded            Document[]              @relation("DocumentsUploadedBy")
   paymentProofsUploaded        PaymentProof[]          @relation("PaymentProofsUploadedBy")
+  assembliesCreated            AssemblyGeneral[]       @relation("AssembliesCreatedBy")
+  assemblyParticipants         AssemblyParticipant[]   @relation("AssemblyParticipantsUser")
+  assemblyVotes                AssemblyVote[]          @relation("AssemblyVotesUser")
   pushTokens                   UserPushToken[]         @relation("UserPushTokens")
   teamMemberships              SyndicTeamMember[]      @relation("TeamMemberUser")
   teamInvitationsSent          SyndicTeamMember[]      @relation("TeamMemberInvitedBy")
@@ -225,6 +260,7 @@ model Residence {
   notifications         Notification[]
   announcements         Announcement[]
   documents             Document[]
+  assemblies            AssemblyGeneral[]
   teamMembers           SyndicTeamMember[]
 
   @@index([syndicId])
@@ -353,10 +389,12 @@ model Apartment {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  residence          Residence           @relation(fields: [residenceId], references: [id])
-  residentApartments ResidentApartment[]
-  payments           Payment[]
-  complaints         Complaint[]
+  residence            Residence             @relation(fields: [residenceId], references: [id])
+  residentApartments   ResidentApartment[]
+  payments             Payment[]
+  complaints           Complaint[]
+  assemblyParticipants AssemblyParticipant[]
+  assemblyVotes        AssemblyVote[]
 
   @@unique([residenceId, number])
   @@index([residenceId])
@@ -436,13 +474,136 @@ model Document {
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
-  residence  Residence @relation(fields: [residenceId], references: [id])
-  uploadedBy User      @relation("DocumentsUploadedBy", fields: [uploadedById], references: [id])
+  residence         Residence          @relation(fields: [residenceId], references: [id])
+  uploadedBy        User               @relation("DocumentsUploadedBy", fields: [uploadedById], references: [id])
+  assemblyDocuments AssemblyDocument[]
 
   @@index([residenceId])
   @@index([uploadedById])
   @@index([type])
   @@index([createdAt])
+}
+
+model AssemblyGeneral {
+  id             String         @id @default(uuid())
+  residenceId    String
+  createdById    String
+  title          String
+  description    String?
+  type           AssemblyType   @default(ORDINAIRE)
+  status         AssemblyStatus @default(DRAFT)
+  scheduledAt    DateTime
+  location       String
+  meetingLink    String?
+  quorumRequired Float?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  residence    Residence             @relation(fields: [residenceId], references: [id])
+  createdBy    User                  @relation("AssembliesCreatedBy", fields: [createdById], references: [id])
+  agendaItems  AssemblyAgendaItem[]
+  documents    AssemblyDocument[]
+  participants AssemblyParticipant[]
+  resolutions  AssemblyResolution[]
+
+  @@index([residenceId])
+  @@index([createdById])
+  @@index([status])
+  @@index([scheduledAt])
+}
+
+model AssemblyAgendaItem {
+  id          String   @id @default(uuid())
+  assemblyId  String
+  title       String
+  description String?
+  order       Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  assembly AssemblyGeneral @relation(fields: [assemblyId], references: [id], onDelete: Cascade)
+
+  @@index([assemblyId])
+  @@index([order])
+}
+
+model AssemblyDocument {
+  id          String   @id @default(uuid())
+  assemblyId  String
+  documentId  String?
+  title       String
+  fileName    String?
+  storagePath String?
+  mimeType    String?
+  size        Int?
+  createdAt   DateTime @default(now())
+
+  assembly AssemblyGeneral @relation(fields: [assemblyId], references: [id], onDelete: Cascade)
+  document Document?       @relation(fields: [documentId], references: [id])
+
+  @@index([assemblyId])
+  @@index([documentId])
+}
+
+model AssemblyParticipant {
+  id                String            @id @default(uuid())
+  assemblyId        String
+  userId            String
+  apartmentId       String?
+  status            ParticipantStatus @default(INVITED)
+  representedByName String?
+  proxyDocumentUrl  String?
+  checkedInAt       DateTime?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+
+  assembly  AssemblyGeneral @relation(fields: [assemblyId], references: [id], onDelete: Cascade)
+  user      User            @relation("AssemblyParticipantsUser", fields: [userId], references: [id])
+  apartment Apartment?      @relation(fields: [apartmentId], references: [id])
+
+  @@unique([assemblyId, userId, apartmentId])
+  @@index([assemblyId])
+  @@index([userId])
+  @@index([apartmentId])
+  @@index([status])
+}
+
+model AssemblyResolution {
+  id           String                 @id @default(uuid())
+  assemblyId   String
+  title        String
+  description  String?
+  order        Int
+  votingStatus ResolutionVotingStatus @default(NOT_STARTED)
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+
+  assembly AssemblyGeneral @relation(fields: [assemblyId], references: [id], onDelete: Cascade)
+  votes    AssemblyVote[]
+
+  @@index([assemblyId])
+  @@index([order])
+  @@index([votingStatus])
+}
+
+model AssemblyVote {
+  id           String            @id @default(uuid())
+  resolutionId String
+  userId       String
+  apartmentId  String?
+  vote         AssemblyVoteValue
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  resolution AssemblyResolution @relation(fields: [resolutionId], references: [id], onDelete: Cascade)
+  user       User               @relation("AssemblyVotesUser", fields: [userId], references: [id])
+  apartment  Apartment?         @relation(fields: [apartmentId], references: [id])
+
+  @@unique([resolutionId, userId, apartmentId])
+  @@index([resolutionId])
+  @@index([userId])
+  @@index([apartmentId])
+  @@index([vote])
 }
 
 model ComplaintComment {

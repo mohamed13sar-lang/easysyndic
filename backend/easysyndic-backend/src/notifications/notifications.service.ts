@@ -160,7 +160,10 @@ export class NotificationsService {
     }
 
     if (query.residenceId) {
-      await this.ensureResidentResidenceAccess(currentUser.id, query.residenceId);
+      await this.ensureResidentResidenceAccess(
+        currentUser.id,
+        query.residenceId,
+      );
     }
 
     const limit = Math.max(1, Math.min(Number(query.limit ?? 20), 100));
@@ -177,7 +180,9 @@ export class NotificationsService {
           ? {
               notification: {
                 ...(typeFilter ? { type: typeFilter } : {}),
-                ...(query.residenceId ? { residenceId: query.residenceId } : {}),
+                ...(query.residenceId
+                  ? { residenceId: query.residenceId }
+                  : {}),
               },
             }
           : {}),
@@ -544,7 +549,10 @@ export class NotificationsService {
     return [...new Set(rows.map((r) => r.userId))];
   }
 
-  private async ensureResidentResidenceAccess(userId: string, residenceId: string) {
+  private async ensureResidentResidenceAccess(
+    userId: string,
+    residenceId: string,
+  ) {
     const link = await this.prisma.residentApartment.findFirst({
       where: {
         userId,
